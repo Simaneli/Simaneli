@@ -16,6 +16,8 @@
       .card .name{margin:4px 0;line-height:1.2}
       .card .meta{line-height:1.3}
       .card .price{font-size:18px;margin-top:5px}
+      .sim-price-main{font-weight:800;line-height:1.15}
+      .sim-price-alt{font-size:12px;font-weight:600;color:#777;line-height:1.25;margin-top:2px}
       #productModal .detail-img{display:block;width:100%;height:auto;max-height:70vh;object-fit:contain;background:#f7f5f1}
       @media(max-width:650px){
         .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:6px 6px 90px}
@@ -44,6 +46,69 @@
 
   function firstImage(v){
     return parseImages(v)[0] || "";
+  }
+
+  const FALLBACK_FX={USD_AMD:382,USD_CNY:7.12};
+  let fx={...FALLBACK_FX};
+
+  function n(v){
+    const x=Number(v);
+    return Number.isFinite(x)?x:0;
+  }
+
+  async function loadFxRates(){
+    try{
+      const r=await fetch("https://open.er-api.com/v6/latest/USD",{cache:"no-store"});
+      if(!r.ok) return;
+      const d=await r.json();
+      if(d && d.rates){
+        if(n(d.rates.AMD)>0) fx.USD_AMD=n(d.rates.AMD);
+        if(n(d.rates.CNY)>0) fx.USD_CNY=n(d.rates.CNY);
+      }
+    }catch(e){
+      console.warn("Simaneli FX fallback rates are being used.",e);
+    }
+  }
+
+  function convertToAll(price,currency){
+    const p=n(price);
+    const cur=String(currency||"AMD").toUpperCase();
+    let usd=0;
+    if(cur==="USD") usd=p;
+    else if(cur==="CNY") usd=p/fx.USD_CNY;
+    else usd=p/fx.USD_AMD;
+    return {AMD:usd*fx.USD_AMD,CNY:usd*fx.USD_CNY,USD:usd};
+  }
+
+  function fmtCurrency(v,cur){
+    const value=n(v);
+    if(cur==="AMD") return "֏ "+new Intl.NumberFormat("hy-AM",{maximumFractionDigits:0}).format(Math.round(value));
+    if(cur==="CNY") return "¥ "+new Intl.NumberFormat("zh-CN",{maximumFractionDigits:0}).format(Math.round(value));
+    return "$ "+new Intl.NumberFormat("en-US",{maximumFractionDigits:0}).format(Math.round(value));
+  }
+
+  async function applyThreeCurrencyPrices(){
+    try{
+      const res=await fetch(
+        SUPABASE_URL+"/rest/v1/products?select=sku,sale_price,currency,active&active=eq.true",
+        {headers:{apikey:SUPABASE_KEY}}
+      );
+      if(!res.ok) return;
+      const products=await res.json();
+      for(const p of products){
+        if(!p.sku) continue;
+        const card=findCardForSku(String(p.sku));
+        if(!card) continue;
+        const priceEl=card.querySelector(".price");
+        if(!priceEl) continue;
+        const all=convertToAll(p.sale_price,p.currency);
+        priceEl.innerHTML=
+          '<div class="sim-price-main">'+fmtCurrency(all.AMD,"AMD")+'</div>'+
+          '<div class="sim-price-alt">'+fmtCurrency(all.CNY,"CNY")+' &nbsp;·&nbsp; '+fmtCurrency(all.USD,"USD")+'</div>';
+      }
+    }catch(e){
+      console.error("Simaneli FX price display:",e);
+    }
   }
 
   function findCardForSku(sku){
@@ -179,8 +244,10 @@
 
   async function runFixes(){
     applyCompactStyles();
+    await loadFxRates();
     await fixHomeCardImages();
     await attachDetailGallery();
+    await applyThreeCurrencyPrices();
   }
 
   if(document.readyState==="loading"){
