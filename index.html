@@ -75,6 +75,9 @@ header{background:#222;color:white;padding:24px 18px 20px;position:sticky;top:0;
   padding: 0 !important;
   margin: 0 !important;
 }
+
+.subcategory-filters{width:100%;display:flex;gap:8px;flex-wrap:wrap;margin-top:2px;padding-top:8px;border-top:1px solid #e8e3d9}
+.category-filter.subcategory{font-size:13px;padding:8px 11px;background:#fff}
 </style>
 </head>
 <body>
@@ -179,7 +182,16 @@ let cart = JSON.parse(localStorage.getItem('cd_cart_v3') || '[]');
 let orders = JSON.parse(localStorage.getItem('cd_orders_v3') || '[]');
 let current = null, selectedSize = null, selectedColor = null;
 let selectedCategory = '';
-const catalogCategories = ['Мужские кроссовки','Мужские спортивные костюмы','Мужские джинсовые брюки','Женские платья','Женские кофты','Женские спортивные костюмы','Женские джинсовые брюки','HandMade','Продукты питания','Автозапчасти','Парфюмерия','Хозяйственные товары','Аксессуары','Сумки','Очки'];
+const categoryGroups = {
+  'Мужская одежда': ['Мужские спортивные костюмы','Мужские джинсовые брюки','Мужские джинсы','Мужские брюки','Мужские кофты','Мужские футболки','Мужские куртки','Мужская верхняя одежда'],
+  'Женская одежда': ['Женские платья','Женские кофты','Женские спортивные костюмы','Женские джинсовые брюки','Женские джинсы','Женские брюки','Женские футболки','Женские куртки','Женская верхняя одежда'],
+  'Обувь': ['Мужские кроссовки','Женская обувь','Мужская обувь'],
+  'Электроника': ['Смартфоны','Ноутбуки','Планшеты','Смарт-часы','Наушники','Аксессуары для электроники','Другая техника'],
+  'Авто и крупная техника': ['Электромобили','Автомобили','Электроскутеры','Электромотоциклы','Электровелосипеды','Генераторы','Крупная бытовая техника','Промышленное оборудование']
+};
+const standaloneCategories = ['HandMade','Продукты питания','Автозапчасти','Парфюмерия','Хозяйственные товары','Аксессуары','Сумки','Очки'];
+const catalogCategories = [...Object.keys(categoryGroups), ...standaloneCategories];
+const allProductCategories = [...new Set([...Object.values(categoryGroups).flat(), ...standaloneCategories])];
 
 const money = n => Number(n).toLocaleString('ru-RU') + ' ֏';
 const finalPrice = p => p.discount>0 ? Math.round(p.price*(1-p.discount/100)) : p.price;
@@ -238,10 +250,13 @@ function selectCategory(category){
   renderProducts();
 }
 function renderCategoryFilters(){
-  document.getElementById('categoryFilters').innerHTML=['',...catalogCategories].map(category=>{
+  const mainButtons=['',...catalogCategories].map(category=>{
     const label=category||'Все товары';
     return `<button type="button" class="category-filter${selectedCategory===category?' active':''}" data-category="${category}" aria-pressed="${selectedCategory===category}">${label}</button>`;
   }).join('');
+  const children=categoryGroups[selectedCategory]||[];
+  const childButtons=children.length ? `<div class="subcategory-filters">${children.map(category=>`<button type="button" class="category-filter subcategory" data-category="${category}" aria-pressed="false">${category}</button>`).join('')}</div>` : '';
+  document.getElementById('categoryFilters').innerHTML=mainButtons+childButtons;
 }
 document.getElementById('categoryFilters').addEventListener('click',event=>{
   const button=event.target.closest('button[data-category]');
@@ -250,7 +265,12 @@ document.getElementById('categoryFilters').addEventListener('click',event=>{
 function renderProducts(){
   renderCategoryFilters();
   const q=(document.getElementById('search').value||'').toLowerCase();
-  const list=products.filter(p=>(!selectedCategory||p.category?.trim()===selectedCategory)&&(p.name+' '+p.sku).toLowerCase().includes(q));
+  const selectedChildren=categoryGroups[selectedCategory]||null;
+  const list=products.filter(p=>{
+    const productCategory=p.category?.trim()||'';
+    const categoryMatch=!selectedCategory || productCategory===selectedCategory || (selectedChildren && selectedChildren.includes(productCategory));
+    return categoryMatch && (p.name+' '+p.sku).toLowerCase().includes(q);
+  });
   document.getElementById('grid').innerHTML=list.map(p=>`
   <div class="card" onclick="openProduct('${p.sku}')">
     <img src="${p.img}" alt="${p.name}">
