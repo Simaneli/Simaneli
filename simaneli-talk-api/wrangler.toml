@@ -1,0 +1,6 @@
+name = "simaneli-talk-api"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+# Add GROQ_API_KEY as an encrypted secret in Cloudflare dashboard.
+# Do not place the key in this file.
