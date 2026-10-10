@@ -17,16 +17,18 @@ function report(t,warning=false){status.textContent=t;status.className=warning?'
 function buttons(busy){hy.disabled=busy;zh.disabled=busy;stop.disabled=!recorder||recorder.state!=='recording'}
 function clearResources(){if(frame)cancelAnimationFrame(frame);frame=0;if(ac){ac.close().catch(()=>{});ac=null}if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}analyser=null}
 function endRecording(){if(recorder&&recorder.state==='recording')recorder.stop()}
-function pickVoice(language){return speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(language==='hy'?'hy':'zh'))}
+function pickVoice(language){const voices=speechSynthesis.getVoices();return voices.find(v=>v.lang.toLowerCase()===(language==='hy'?'hy-am':'zh-cn'))||voices.find(v=>v.lang.toLowerCase().startsWith(language==='hy'?'hy':'zh'))}
+function primeVoice(){if(!('speechSynthesis' in window))return;try{speechSynthesis.cancel();speechSynthesis.getVoices();const u=new SpeechSynthesisUtterance(' ');u.lang='zh-CN';u.volume=0;speechSynthesis.speak(u)}catch(e){}}
 function speak(text,language){return new Promise(resolve=>{
  if(!text||text==='—'||!window.speechSynthesis){report('На устройстве нет доступного механизма озвучивания.',true);resolve();return}
  let finished=false;const finish=()=>{if(!finished){finished=true;resolve()}};
  speechSynthesis.cancel();
  const u=new SpeechSynthesisUtterance(text);u.lang=language==='hy'?'hy-AM':'zh-CN';u.rate=.88;
- const v=pickVoice(language);if(v)u.voice=v;
+ const v=pickVoice(language);if(v)u.voice=v;else report('На iPhone не найден голос '+(language==='zh'?'китайского':'армянского')+' языка. Проверь установленные голоса iOS.',true);
  u.onstart=()=>report('🔊 Произношу перевод…');
  u.onend=finish;u.onerror=()=>{report('Перевод готов, но Safari не воспроизвёл голос. Нажми «🔊 Озвучить» и проверь громкость.',true);finish()};
  speechSynthesis.speak(u);
+ if(speechSynthesis.paused) speechSynthesis.resume();
  setTimeout(()=>{if(!finished){if(!speechSynthesis.speaking)report('Safari не запустил автоматическую озвучку. Нажми «🔊 Озвучить».',true);finish()}},12000);
  })}
 async function translateText(text,language){
@@ -39,7 +41,7 @@ async function translateText(text,language){
  const translated=decoder.value;target.textContent=translated;
  report('✅ Перевод готов. Пытаюсь озвучить…');
  await speak(translated,language==='hy'?'zh':'hy');
- if(!status.textContent.includes('озвучка заблокирована'))report('✅ Готово. Для ответа нажми кнопку второго языка.');
+ if(status.textContent==='🔊 Произношу перевод…'||status.textContent==='✅ Перевод готов. Пытаюсь озвучить…')report('✅ Перевод готов. Если звук не слышен — проверь голос и громкость iPhone.');
 }
 async function processRecording(blob,language,seq){
  if(seq!==session)return;
@@ -66,7 +68,7 @@ async function start(language){
  try{
   if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder)throw Error('Браузер не поддерживает запись. Открой Safari');
   // Unlock audio output during a user gesture when possible.
-  if(window.speechSynthesis){speechSynthesis.cancel();speechSynthesis.getVoices();voiceReady=true}
+  if(window.speechSynthesis){primeVoice()}
   stream=await navigator.mediaDevices.getUserMedia({audio:true});
   ac=new (window.AudioContext||window.webkitAudioContext)();
   await ac.resume();const src=ac.createMediaStreamSource(stream);
@@ -98,7 +100,7 @@ async function start(language){
   frame=requestAnimationFrame(detect);
  }catch(e){clearResources();recorder=null;working=false;buttons(false);report('Микрофон не открылся: '+e.message,true)}
 }
-hy.onclick=()=>start('hy');zh.onclick=()=>start('zh');stop.onclick=endRecording;
+hy.onclick=()=>{primeVoice();start('hy')};zh.onclick=()=>{primeVoice();start('zh')};stop.onclick=endRecording;
 el('translate').onclick=async()=>{const q=source.value.trim();if(!q)return report('Сначала произнеси или введи фразу.',true);if(working)return;if(q.length>450)return report('Слишком длинный текст.',true);working=true;buttons(true);try{await translateText(q,selected)}catch(e){report(e.message,true)}finally{working=false;buttons(false)}};
 el('speak').onclick=()=>speak(target.textContent,selected==='hy'?'zh':'hy');
 document.addEventListener('visibilitychange',()=>{if(document.hidden)endRecording()});
