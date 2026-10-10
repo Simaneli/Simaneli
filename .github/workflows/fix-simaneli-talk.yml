@@ -23,10 +23,10 @@ jobs:
           <style id="simaneli-voice-fixes">
           /* The image already contains decorative speech/translation panels:
              crop those baked-in panels so only the functional full-text cards remain. */
-          main{aspect-ratio:941/1110!important;background-size:100% auto!important;background-position:top center!important;overflow:hidden!important}
-          #shop{top:28.8%!important;left:4%!important;width:92%!important;height:13.4%!important}
-          #hy,#zh{top:63.2%!important;height:16.6%!important}
-          #stop{top:81.5%!important;height:9.1%!important}
+          main{aspect-ratio:941/1020!important;background-size:100% auto!important;background-position:top center!important;overflow:hidden!important}
+          #shop{top:31.4%!important;left:4%!important;width:92%!important;height:14.6%!important}
+          #hy,#zh{top:68.8%!important;height:17.8%!important}
+          #stop{top:89%!important;height:9.5%!important}
           #phone{display:none!important}
           #text-results{position:relative;z-index:2}
           #footer .talk-contact-link{display:block;background:linear-gradient(140deg,#112b43,#061525);border:2px solid #d6a65e;border-radius:16px;color:#f2d397;padding:14px 8px;font:600 19px Georgia,serif;text-align:center;text-decoration:none}
