@@ -31,7 +31,24 @@ jobs:
           #recording audio[hidden]{display:none}
           @media(max-width:390px){#actions button{font-size:10px!important;padding:4px 7px!important}}
           </style>"""
-          s=s.replace('</head>',css+'</head>',1)
+          if 'id="simaneli-voice-fixes"' not in s:
+            s=s.replace('</head>',css+'</head>',1)
+          voice_hook = """<script id="simaneli-speech-unlock">
+          // A genuine tap can unlock speech synthesis on iOS Safari.
+          document.addEventListener('pointerdown',function(e){
+            if(!e.target.closest('#hy,#zh'))return;
+            try{
+              if(!window.speechSynthesis)return;
+              speechSynthesis.cancel();
+              const u=new SpeechSynthesisUtterance(' ');
+              u.lang='zh-CN';u.volume=0;
+              speechSynthesis.speak(u);
+              if(speechSynthesis.paused)speechSynthesis.resume();
+            }catch(_){}
+          },true);
+          </script>"""
+          if 'id="simaneli-speech-unlock"' not in s:
+            s=s.replace('</body>',voice_hook+'</body>',1)
           old='function unlock(){try{if("speechSynthesis" in window)speechSynthesis.getVoices()}catch{}}'
           new='''function unlock(){try{if("speechSynthesis" in window){speechSynthesis.cancel();speechSynthesis.getVoices();const u=new SpeechSynthesisUtterance(" ");u.lang="zh-CN";u.volume=0;speechSynthesis.speak(u)}}catch{}}'''
           if old in s:
