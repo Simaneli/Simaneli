@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Simaneli Talk — Армянский ⇄ Китайский</title>
+<meta name="theme-color" content="#061a2b">
+<style>
+:root{--navy:#061a2b;--gold:#e8b75c;--light:#ffe2a0;--line:#a77a35}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#24445b,#06101b 60%);color:#f9eed7;font:15px/1.55 Georgia,serif}
+.shell{max-width:650px;min-height:100dvh;margin:auto;padding:14px 14px 38px;background:linear-gradient(180deg,#082037,#061221)}
+header{text-align:center;padding:28px 12px 15px;background:radial-gradient(ellipse at center,#264054 0,transparent 75%);position:relative}
+header:before{content:"";position:absolute;inset:0;border-bottom:1px solid #a77a35;pointer-events:none}
+.s{font-size:62px;font-weight:bold;line-height:1;color:var(--gold);text-shadow:0 0 13px #f4ba5180}
+h1{display:inline-block;font-size:clamp(30px,7vw,46px);margin:0 0 0 7px;color:var(--light);font-weight:normal}
+.subtitle{margin:13px 0 4px;color:#f4d99f;font-family:system-ui,sans-serif}
+.toplinks{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:18px;font:13px system-ui,sans-serif}
+.toplinks a{color:#ffdc92;border:1px solid var(--line);border-radius:20px;padding:8px 12px;text-decoration:none;background:#061829}
+.card{border:1.5px solid var(--gold);border-radius:17px;margin:14px 0;padding:18px 15px;background:linear-gradient(150deg,#09253c,#03111d);box-shadow:inset 0 0 0 3px #07192a,0 0 15px #e6ae3926}
+.card h2{font-size:21px;color:var(--light);margin:0 0 8px;font-weight:normal}
+.hint{color:#e0d5c3;font:13px/1.5 system-ui,sans-serif;margin:0 0 16px}
+.languages{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.flagbtn{flex:1;min-width:0;background:linear-gradient(#17334c,#05172a);color:#ffe2a0;border:1px solid #d4a252;border-radius:24px;padding:12px 5px;font:13px system-ui,sans-serif;cursor:pointer}
+.flagbtn[aria-pressed=true]{outline:2px solid #ffdc8c;background:#28435a;box-shadow:0 0 15px #ecb84488}
+.flag{font-size:27px;display:block}.mic{border-radius:50%;width:79px;height:79px;flex:none;background:radial-gradient(circle,#f6d18b,#99702e);border:3px solid #ffde8b;color:#092236;font-size:38px;box-shadow:0 0 23px #edb74480;cursor:pointer}
+.mic:disabled{opacity:.55;cursor:not-allowed}.mic.listening{animation:pulse 1.2s infinite}@keyframes pulse{50%{box-shadow:0 0 35px #ff5533}}
+.controls{display:flex;gap:8px;margin-top:17px;align-items:center;justify-content:center;flex-wrap:wrap}
+button.secondary{border:1px solid #af8849;color:#ffe1a0;background:#102d43;border-radius:20px;padding:10px 14px;cursor:pointer}
+#status{text-align:center;margin-top:13px;color:#f2c86d;font:13px system-ui,sans-serif;min-height:40px}
+.output{min-height:96px;background:#03121f;border:1px solid #8f6c34;border-radius:12px;padding:12px;font:18px/1.5 system-ui,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere}
+.outbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px}
+.outbar h2{margin:0}.tiny{background:transparent;border:1px solid #987642;border-radius:15px;color:#f7d897;padding:6px 10px;cursor:pointer}
+footer{text-align:center;color:#c4b494;font:11px/1.7 system-ui,sans-serif;margin:17px auto}
+</style></head>
+<body><main class="shell">
+<header><span class="s">S</span><h1>Simaneli Talk</h1><p class="subtitle">🇦🇲 Армянский　⇄　Китайский 🇨🇳</p>
+<nav class="toplinks"><a href="https://simaneli.github.io/Simaneli/" target="_blank" rel="noopener">↗ Интернет-магазин Simaneli</a><a href="https://www.instagram.com/" target="_blank" rel="noopener" id="instagram">◎ Instagram</a></nav></header>
+<section class="card"><h2>Кто сейчас говорит?</h2><p class="hint">Выберите язык, затем нажмите на микрофон и говорите. После паузы появится распознанная речь и её перевод.</p>
+<div class="languages"><button id="hy" class="flagbtn" aria-pressed="true"><span class="flag">🇦🇲</span>Армянский</button>
+<button class="mic" id="mic" title="Начать или остановить запись" aria-label="Начать запись">🎙</button>
+<button id="zh" class="flagbtn" aria-pressed="false"><span class="flag">🇨🇳</span>Китайский</button></div>
+<div class="controls"><button class="secondary" id="stop">■ Остановить запись</button><button class="secondary" id="swap">⇄ Сменить язык</button></div>
+<div id="status" role="status">Готов к разговору. Выберите язык и нажмите микрофон.</div></section>
+<section class="card"><div class="outbar"><h2>Распознанная речь</h2><button id="copySource" class="tiny">Копировать</button></div><div id="source" class="output" lang="hy" contenteditable="true" role="textbox" aria-label="Распознанная речь; можно исправить вручную"></div><div class="controls"><button id="translate" class="secondary">Перевести текст</button></div></section>
+<section class="card"><div class="outbar"><h2>Перевод</h2><button id="copyTarget" class="tiny">Копировать</button></div><div id="target" class="output" lang="zh"></div><div class="controls"><button class="secondary" id="speak">🔊 Озвучить перевод</button></div></section>
+<footer>При использовании распознавания речи браузер может передавать звук своему поставщику службы. Для перевода текст передаётся во внешний сервис MyMemory. Не используйте для конфиденциальной информации. Работа распознавания и голосов зависит от браузера и устройства.</footer>
+</main>
+<script>
+(()=>{const $=id=>document.getElementById(id), SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;let active='hy',rec=null,recording=false;
+const info=msg=>$('status').textContent=msg;
+const lang=()=>active==='hy'?{from:'hy-AM',to:'zh-CN',source:'hy',target:'zh-CN'}:{from:'zh-CN',to:'hy-AM',source:'zh-CN',target:'hy'};
+function select(x){if(recording)stop();active=x;$('hy').setAttribute('aria-pressed',x==='hy');$('zh').setAttribute('aria-pressed',x==='zh');$('source').lang=lang().from;$('target').lang=lang().to;info('Выбран '+(x==='hy'?'армянский':'китайский')+' язык. Нажмите микрофон.')}
+$('hy').onclick=()=>select('hy');$('zh').onclick=()=>select('zh');$('swap').onclick=()=>select(active==='hy'?'zh':'hy');
+function stop(){if(rec){try{rec.stop()}catch(e){}}recording=false;$('mic').classList.remove('listening');$('mic').setAttribute('aria-label','Начать запись')}
+$('stop').onclick=()=>{stop();info('Запись остановлена.')};
+$('mic').onclick=()=>{if(recording){stop();return}if(!SpeechRecognition){info('Этот браузер не поддерживает распознавание речи. Введите текст в поле ниже и нажмите «Перевести текст».');return}
+rec=new SpeechRecognition();rec.lang=lang().from;rec.continuous=false;rec.interimResults=true;
+rec.onstart=()=>{recording=true;$('mic').classList.add('listening');$('mic').setAttribute('aria-label','Остановить запись');info('Слушаю…')};
+rec.onresult=ev=>{let t='';for(let i=0;i<ev.results.length;i++)t+=ev.results[i][0].transcript;$('source').textContent=t;if(ev.results[ev.results.length-1].isFinal)translate()};
+rec.onerror=ev=>{info('Ошибка распознавания: '+ev.error+'. Можно ввести текст вручную.');stop()};
+rec.onend=()=>{recording=false;$('mic').classList.remove('listening');$('mic').setAttribute('aria-label','Начать запись')};try{rec.start()}catch(e){info('Не удалось начать запись: '+e.message)}
+};
+async function translate(){const text=$('source').innerText.trim();if(!text){info('Сначала произнесите или введите текст.');return}
+$('target').textContent='Перевод…';info('Перевожу…');const l=lang();
+try{const q=new URLSearchParams({q:text,langpair:l.source+'|'+l.target});const resp=await fetch('https://api.mymemory.translated.net/get?'+q.toString());if(!resp.ok)throw Error('HTTP '+resp.status);const obj=await resp.json();const out=obj.responseData?.translatedText;if(!out||Number(obj.responseStatus)>=400)throw Error(obj.responseDetails||'Нет перевода');$('target').textContent=out;info('Перевод готов.');if(window.speechSynthesis){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(out);u.lang=l.to;u.rate=.92;speechSynthesis.speak(u)}catch(e){}}
+}catch(e){$('target').textContent='';info('Перевод недоступен: '+e.message+'. Попробуйте повторить позже.')} }
+$('translate').onclick=translate;
+$('speak').onclick=()=>{let t=$('target').innerText.trim();if(!t)return info('Сначала получите перевод.');if(!window.speechSynthesis)return info('Озвучивание не поддерживается браузером.');speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang=lang().to;speechSynthesis.speak(u);info('Озвучивание запущено, если голос для языка установлен.')};
+async function copy(id){try{await navigator.clipboard.writeText($(id).innerText);info('Текст скопирован.')}catch(e){info('Копирование недоступно. Выделите текст вручную.')}}$('copySource').onclick=()=>copy('source');$('copyTarget').onclick=()=>copy('target');
+})();
+</script></body></html>
