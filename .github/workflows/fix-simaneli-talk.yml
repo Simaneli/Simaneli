@@ -56,6 +56,27 @@ jobs:
             s=re.sub(r'<style id="simaneli-voice-fixes">.*?</style>',css.strip(),s,count=1,flags=re.S)
           else:
             s=s.replace('</head>',css+'</head>',1)
+          instagram_css = """
+          <style id="simaneli-instagram-css">
+          #simaneli-instagram-link{display:flex;align-items:center;justify-content:center;gap:11px;width:calc(100% - 84px);max-width:410px;margin:17px auto 12px;padding:13px 12px;border-radius:15px;border:2px solid #e8b968;background:linear-gradient(145deg,#122b43,#041525);color:#f9d59a;text-decoration:none;font:600 17px Georgia,serif;box-shadow:0 0 12px #dea45366,inset 0 1px #ffe5ac}
+          #simaneli-instagram-link svg{flex:none}
+          </style>"""
+          if 'id="simaneli-instagram-css"' not in s:
+            s=s.replace('</head>',instagram_css+'</head>',1)
+          instagram_script = """<script id="simaneli-instagram-script">
+          (function(){
+            const main=document.querySelector('main');
+            if(!main||document.getElementById('simaneli-instagram-link'))return;
+            const a=document.createElement('a');
+            a.id='simaneli-instagram-link';
+            a.href='https://www.instagram.com/m_simaneli/';
+            a.target='_blank';a.rel='noopener noreferrer';
+            a.innerHTML='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f9d59a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.6" cy="6.5" r="1" fill="#f9d59a" stroke="none"/></svg><span>Instagram · @m_simaneli ↗</span>';
+            main.insertAdjacentElement('afterend',a);
+          })();
+          </script>"""
+          if 'id="simaneli-instagram-script"' not in s:
+            s=s.replace('</body>',instagram_script+'</body>',1)
           relocation="""<script id="simaneli-layout-relocation">
           (function(){
             const footer=document.getElementById('footer');
