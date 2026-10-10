@@ -53,7 +53,19 @@ a.hotspot:focus-visible,button.hotspot:focus-visible {outline:2px solid #ffe4a0}
 #status{top:60.25%;height:3%;max-height:42px;background:#071b2acb;border-radius:10px;padding:2px 5px}
 @media(max-width:380px){#source,#target{font-size:12px}}
 </style>
-</head>
+
+<style id="simaneli-voice-fixes">
+/* Separate live text and audio controls from the static illustration */
+#source{top:71.7%!important;height:2.8%!important;resize:none!important}
+#target{top:82.7%!important;height:2.8%!important;overflow:auto!important}
+#status{top:60.3%!important;height:2.3%!important;left:13%!important;width:74%!important;background:#061728f2;border-radius:14px;font-size:12px!important;z-index:3}
+#actions{top:87.2%!important;z-index:4;gap:8px}
+#actions button{font-size:12px!important;white-space:nowrap}
+#recording{position:static!important;margin:0 auto!important;width:88%!important;text-align:center}
+#recording audio{display:block;width:100%;max-width:420px;margin:8px auto;height:34px}
+#recording audio[hidden]{display:none}
+@media(max-width:390px){#actions button{font-size:10px!important;padding:4px 7px!important}}
+</style></head>
 <body>
 <main aria-label="Simaneli Talk — переводчик армянского и китайского языков">
 <a class="hotspot" id="shop" href="https://simaneli.github.io/Simaneli/" target="_blank" rel="noopener noreferrer" aria-label="Интернет-магазин Simaneli">Магазин</a>
