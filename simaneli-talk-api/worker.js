@@ -63,6 +63,10 @@ export default {
       form.set("file", file);
       form.set("model", "whisper-large-v3");
       form.set("response_format", "json");
+      form.set("temperature", "0");
+      if (language === "hy") {
+        form.set("prompt", "Հայերեն խոսակցություն Երևանի արևելահայերենով։ Բարև ձեզ։ Ինչքա՞ն արժե։ Մեծածախ գինը ո՞րն է։ Քանի՞ հատ է նվազագույն պատվերը։ Չինաստան, Հայաստան, Երևան։");
+      }
       // Specify the chosen language explicitly instead of auto-detection.
       form.set("language", language);
       const upstream = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
