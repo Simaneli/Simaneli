@@ -19,4 +19,27 @@ $('translate').onclick=async()=>{const q=$('input').value.trim();if(!q){status('
 $('speak').onclick=()=>{if(!spoken){status('Сначала переведи фразу.');return}if(!('speechSynthesis' in window)){status('Озвучивание не поддерживается на устройстве.');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(spoken);u.lang=armenian?'zh-CN':'hy-AM';u.rate=.87;const voice=speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(armenian?'zh':'hy'));if(voice)u.voice=voice;else status('Голос для этого языка может отсутствовать.');speechSynthesis.speak(u)};
 $('copy').onclick=async()=>{if(!spoken)return;try{await navigator.clipboard.writeText(spoken);status('Скопировано.')}catch(e){status('Не удалось скопировать.')}};
 display()})();
+</script><script>
+(()=>{
+const mic=document.getElementById('mic'),voice=document.getElementById('voice'),fallback=document.getElementById('fallback');
+const note=document.createElement('div');note.className='notice';note.style.display='block';note.style.background='#e6f4f1';note.textContent='Новая проверка: запись хранится только на этом телефоне и не отправляется на сервер. После записи нажми ▶, чтобы услышать себя. Автоматическое распознавание аудио пока не подключено.';mic.after(note);
+const player=document.createElement('audio');player.controls=true;player.style.width='100%';player.style.marginTop='10px';player.style.display='none';note.after(player);
+let recorder=null,stream=null,chunks=[],url=null;
+function reset(){mic.textContent='🎙️ Записать голос (тест)';mic.style.background='#25878b';}
+reset();
+document.getElementById('swap').addEventListener('click',()=>setTimeout(reset,0));
+mic.addEventListener('click',async e=>{
+e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+if(recorder&&recorder.state==='recording'){recorder.stop();return}
+if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){voice.textContent='Запись микрофона недоступна в этом браузере. Открой сайт в Safari.';return}
+try{
+stream=await navigator.mediaDevices.getUserMedia({audio:true});
+chunks=[];if(url){URL.revokeObjectURL(url);url=null}
+let rec=new MediaRecorder(stream);recorder=rec;
+rec.ondataavailable=x=>{if(x.data.size)chunks.push(x.data)};
+rec.onstop=()=>{let blob=new Blob(chunks,{type:rec.mimeType||'audio/mp4'});url=URL.createObjectURL(blob);player.src=url;player.style.display='block';voice.textContent='Запись готова. Нажми ▶ для прослушивания. Для перевода записи потребуется сервер.';stream?.getTracks().forEach(t=>t.stop());stream=null;recorder=null;reset()};
+rec.start();voice.textContent='Запись идёт… Говори на армянском или китайском.';fallback.style.display='none';mic.textContent='⏹ Завершить запись';mic.style.background='#ba5538';
+}catch(err){voice.textContent='Микрофон не открылся: '+(err.name||'')+'. Проверь настройки Safari → Микрофон.';fallback.style.display='block';reset()}
+},true);
+})();
 </script></body></html>
