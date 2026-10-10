@@ -21,46 +21,102 @@ $('copy').onclick=async()=>{if(!spoken)return;try{await navigator.clipboard.writ
 display()})();
 </script><script>
 (()=>{
-const mic=document.getElementById('mic'),voice=document.getElementById('voice'),fallback=document.getElementById('fallback');
-const note=document.createElement('div');note.className='notice';note.style.display='block';note.style.background='#e6f4f1';note.textContent='Запиши фразу, затем нажми «Распознать голос». Только после нажатия запись отправится в Groq через сервер Cloudflare. Не записывай конфиденциальные разговоры.';mic.after(note);
-const player=document.createElement('audio');player.controls=true;player.style.width='100%';player.style.marginTop='10px';player.style.display='none';note.after(player);
-const send=document.createElement('button');send.className='primary';send.style.width='100%';send.style.marginTop='10px';send.textContent='✨ Распознать голос';send.disabled=true;player.after(send);
-let lastBlob=null;
-send.onclick=async()=>{
- if(!lastBlob)return;
- send.disabled=true;send.textContent='⏳ Распознаём…';voice.textContent='Отправляю аудио на сервер для распознавания…';
+const $=id=>document.getElementById(id);
+const mic=$('mic'), voice=$('voice'), fallback=$('fallback');
+const note=document.createElement('div');note.className='notice';note.style.display='block';note.style.background='#e6f4f1';
+note.textContent='Автоматический режим: один раз нажми «Начать разговор». Приложение слушает короткие реплики, делает перевод и старается озвучить его. Для изменения языка собеседника нажми «Поменять языки». Аудио отправляется в Groq. Не используй для конфиденциальных разговоров.';
+mic.before(note);
+const auto=document.createElement('button');auto.className='primary';auto.style.width='100%';auto.style.marginBottom='10px';auto.textContent='🟢 Начать автоматический разговор';note.after(auto);
+const player=document.createElement('audio');player.controls=true;player.style.width='100%';player.style.marginTop='10px';player.style.display='none';mic.after(player);
+const send=document.createElement('button');send.className='primary';send.style.width='100%';send.style.marginTop='10px';send.textContent='✨ Распознать и перевести';send.disabled=true;player.after(send);
+let stream=null, recorder=null, parts=[], lastBlob=null, autoOn=false, busy=false, analyser=null, ctx=null, raf=0, lastVoice=0, began=0, sawVoice=false, currentStop=null;
+const endpoint='https://simaneli-talk-api.sls097323232.workers.dev/transcribe';
+function setVoice(t){voice.textContent=t}
+function lang(){return $('from').textContent.includes('Հայերեն')?'hy':'zh'}
+function stopStream(){if(raf)cancelAnimationFrame(raf);raf=0;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}if(ctx){ctx.close().catch(()=>{});ctx=null}analyser=null}
+function manualLabel(){mic.textContent=recorder&&recorder.state==='recording'?'⏹ Завершить запись':'🎙️ Записать голос';}
+async function process(blob,automatic){
+ if(!blob||!blob.size||blob.size>5*1024*1024){setVoice('Запись пустая или слишком большая.');return false}
+ busy=true;send.disabled=true;setVoice('⏳ Распознаю и перевожу…');
  try{
-  const form=new FormData();
-  const type=lastBlob.type||'audio/mp4';
-  const ext=type.includes('mp4')?'m4a':type.includes('webm')?'webm':'wav';
-  form.append('file',new File([lastBlob],'voice.'+ext,{type}));
-  const lang=document.getElementById('from').textContent.includes('Հայերեն')?'hy':'zh';
-  form.append('language',lang);
-  const response=await fetch('https://simaneli-talk-api.sls097323232.workers.dev/transcribe',{method:'POST',body:form});
-  const data=await response.json().catch(()=>({}));
-  if(!response.ok)throw new Error(data.error||('HTTP '+response.status));
-  if(!data.text)throw new Error('Сервис не распознал речь. Попробуй ещё раз.');
-  document.getElementById('input').value=data.text;
-  voice.textContent='✅ Текст распознан. Проверь его, затем нажми «Перевести →».';
- }catch(err){voice.textContent='Ошибка распознавания: '+err.message+'. Можно ввести текст вручную.'}
- finally{send.disabled=false;send.textContent='✨ Распознать голос'}
-};
-let recorder=null,stream=null,chunks=[],url=null;
-function reset(){mic.textContent='🎙️ Записать голос (тест)';mic.style.background='#25878b';}
-reset();
-document.getElementById('swap').addEventListener('click',()=>setTimeout(reset,0));
-mic.addEventListener('click',async e=>{
-e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-if(recorder&&recorder.state==='recording'){recorder.stop();return}
-if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){voice.textContent='Запись микрофона недоступна в этом браузере. Открой сайт в Safari.';return}
-try{
-stream=await navigator.mediaDevices.getUserMedia({audio:true});
-chunks=[];lastBlob=null;send.disabled=true;if(url){URL.revokeObjectURL(url);url=null}
-let rec=new MediaRecorder(stream);recorder=rec;
-rec.ondataavailable=x=>{if(x.data.size)chunks.push(x.data)};
-rec.onstop=()=>{let blob=new Blob(chunks,{type:rec.mimeType||'audio/mp4'});lastBlob=blob;send.disabled=blob.size===0||blob.size>5*1024*1024;url=URL.createObjectURL(blob);player.src=url;player.style.display='block';voice.textContent=send.disabled?'Запись слишком большая или пустая. Запиши короткую фразу до 5 МБ.':'Запись готова. Нажми «Распознать голос», затем «Перевести». ';stream?.getTracks().forEach(t=>t.stop());stream=null;recorder=null;reset()};
-rec.start();voice.textContent='Запись идёт… Говори на армянском или китайском.';fallback.style.display='none';mic.textContent='⏹ Завершить запись';mic.style.background='#ba5538';
-}catch(err){voice.textContent='Микрофон не открылся: '+(err.name||'')+'. Проверь настройки Safari → Микрофон.';fallback.style.display='block';reset()}
-},true);
+ const fd=new FormData(),type=blob.type||'audio/mp4',ext=type.includes('mp4')?'m4a':'webm';
+ fd.append('file',new File([blob],'voice.'+ext,{type}));fd.append('language',lang());
+ const resp=await fetch(endpoint,{method:'POST',body:fd});const data=await resp.json().catch(()=>({}));
+ if(!resp.ok)throw Error(data.error||('HTTP '+resp.status));
+ if(!data.text)throw Error('Речь не распознана');
+ $('input').value=data.text;
+ const q=data.text,from=lang()==='hy'?'hy':'zh-CN',to=lang()==='hy'?'zh-CN':'hy';
+ const tr=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(q)+'&langpair='+encodeURIComponent(from+'|'+to));
+ const result=await tr.json();if(!tr.ok||result.responseStatus!==200||!result.responseData?.translatedText||/MYMEMORY WARNING/i.test(result.responseData.translatedText))throw Error('Перевод недоступен');
+ const decoder=document.createElement('textarea');decoder.innerHTML=result.responseData.translatedText;
+ const output=decoder.value;$('out').textContent=output;
+ setVoice('✅ Перевод готов. Речь может распознаваться с ошибками — проверяй цены и цифры.');
+ if(automatic&&'speechSynthesis' in window){
+  speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(output);u.lang=to==='zh-CN'?'zh-CN':'hy-AM';u.rate=.9;
+  const match=speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(to==='zh-CN'?'zh':'hy'));if(match)u.voice=match;
+  speechSynthesis.speak(u);
+ }
+ return true;
+ }catch(err){setVoice('Ошибка: '+err.message+'. Попробуй ещё раз.');return false}
+ finally{busy=false;send.disabled=false}
+}
+async function getStream(){if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder)throw Error('Safari не поддерживает запись микрофона');stream=await navigator.mediaDevices.getUserMedia({audio:true});}
+function recordOnce(){
+ return new Promise((resolve,reject)=>{
+  try{
+   parts=[];recorder=new MediaRecorder(stream);
+   recorder.ondataavailable=e=>{if(e.data.size)parts.push(e.data)};
+   recorder.onerror=e=>reject(Error('Ошибка записи'));
+   recorder.onstop=()=>{const blob=new Blob(parts,{type:recorder.mimeType||'audio/mp4'});recorder=null;lastBlob=blob;resolve(blob)};
+   recorder.start();manualLabel();
+  }catch(e){reject(e)}
+ });
+}
+async function startManual(){
+ if(recorder&&recorder.state==='recording'){recorder.stop();return}
+ if(autoOn)return;
+ try{await getStream();setVoice('🎤 Записываю…');const blob=await recordOnce();stopStream();manualLabel();send.disabled=blob.size===0;player.src=URL.createObjectURL(blob);player.style.display='block';setVoice('Запись готова. Нажми «Распознать и перевести».')}
+ catch(err){stopStream();setVoice(err.message)}
+}
+mic.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();startManual()},true);
+send.onclick=()=>process(lastBlob,false);
+async function startAuto(){
+ if(autoOn){autoOn=false;auto.textContent='🟢 Начать автоматический разговор';if(recorder&&recorder.state==='recording')recorder.stop();stopStream();setVoice('Автоматический режим остановлен.');return}
+ try{
+  if('speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.getVoices()}
+  await getStream();ctx=new (window.AudioContext||window.webkitAudioContext)();await ctx.resume();
+  const source=ctx.createMediaStreamSource(stream);analyser=ctx.createAnalyser();analyser.fftSize=1024;source.connect(analyser);
+  autoOn=true;mic.disabled=true;auto.textContent='🔴 Остановить разговор';
+  while(autoOn){
+   parts=[];sawVoice=false;began=Date.now();lastVoice=began;
+   const recording=recordOnce();setVoice('🎧 Слушаю… (по '+(lang()==='hy'?'армянски':'китайски')+')');
+   await new Promise(resolve=>{
+    const data=new Uint8Array(analyser.fftSize);
+    function check(){
+     if(!autoOn||!recorder||recorder.state!=='recording'){resolve();return}
+     analyser.getByteTimeDomainData(data);
+     let sum=0;for(let i=0;i<data.length;i++){let d=(data[i]-128)/128;sum+=d*d}
+     const rms=Math.sqrt(sum/data.length),now=Date.now();
+     if(rms>.025){sawVoice=true;lastVoice=now}
+     if((sawVoice&&now-lastVoice>1100&&now-began>900)||now-began>12000){
+       recorder.stop();resolve();return
+     }
+     raf=requestAnimationFrame(check)
+    }
+    raf=requestAnimationFrame(check);
+   });
+   const blob=await recording;if(!autoOn)break;
+   if(sawVoice&&blob.size){await process(blob,true)}
+   // Wait for speech playback to finish where browser supports it.
+   if('speechSynthesis'in window&&speechSynthesis.speaking){
+    await new Promise(resolve=>{const start=Date.now();const poll=()=>{if(!autoOn||!speechSynthesis.speaking||Date.now()-start>15000){resolve();return}setTimeout(poll,250)};poll()});
+   }
+  }
+ }catch(err){setVoice('Автоматический режим недоступен: '+err.message)}
+ finally{autoOn=false;mic.disabled=false;auto.textContent='🟢 Начать автоматический разговор';stopStream();manualLabel()}
+}
+auto.onclick=()=>startAuto();
+$('swap').addEventListener('click',()=>{if(autoOn){auto.click()}setVoice('Язык изменён. Нажми «Начать разговор», чтобы слушать собеседника.')});
+manualLabel();
 })();
 </script></body></html>
