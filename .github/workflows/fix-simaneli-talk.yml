@@ -21,6 +21,15 @@ jobs:
           import re
           css="""
           <style id="simaneli-voice-fixes">
+          /* The image already contains decorative speech/translation panels:
+             crop those baked-in panels so only the functional full-text cards remain. */
+          main{aspect-ratio:941/1110!important;background-size:100% auto!important;background-position:top center!important;overflow:hidden!important}
+          #shop{top:28.8%!important;left:4%!important;width:92%!important;height:13.4%!important}
+          #hy,#zh{top:63.2%!important;height:16.6%!important}
+          #stop{top:81.5%!important;height:9.1%!important}
+          #phone{display:none!important}
+          #text-results{position:relative;z-index:2}
+          #footer .talk-contact-link{display:block;background:linear-gradient(140deg,#112b43,#061525);border:2px solid #d6a65e;border-radius:16px;color:#f2d397;padding:14px 8px;font:600 19px Georgia,serif;text-align:center;text-decoration:none}
           /* Long speech and translation use normal document flow */
           #text-results{margin:14px auto;width:min(94%,580px);display:flex;flex-direction:column;gap:14px}
           .talk-result-panel{background:#06192c;border:2px solid #d6a65e;box-shadow:0 0 12px #d6a65e66;border-radius:17px;padding:14px;color:#f7dca7}
@@ -50,6 +59,19 @@ jobs:
           </script>"""
           if 'id="simaneli-layout-relocation"' not in s:
             s=s.replace('</body>',relocation+'</body>',1)
+          contact_script="""<script id="simaneli-contact-card">
+          (function(){
+            const footer=document.getElementById('footer');
+            if(!footer||footer.querySelector('.talk-contact-link'))return;
+            const a=document.createElement('a');
+            a.className='talk-contact-link';
+            a.href='tel:+8617520055552';
+            a.textContent='☎ Связаться с нами · +86 175 2005 5552';
+            footer.prepend(a);
+          })();
+          </script>"""
+          if 'id="simaneli-contact-card"' not in s:
+            s=s.replace('</body>',contact_script+'</body>',1)
           long_results="""<script id="simaneli-long-results">
           (function(){
             const main=document.querySelector('main'),src=document.getElementById('source'),target=document.getElementById('target');
