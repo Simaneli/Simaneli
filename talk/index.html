@@ -12,21 +12,22 @@
 (()=>{
 const el=id=>document.getElementById(id), api='https://simaneli-talk-api.sls097323232.workers.dev/transcribe';
 const status=el('status'),hy=el('hy'),zh=el('zh'),stop=el('stop'),audio=el('audio'),source=el('source'),target=el('target'),targetlabel=el('targetlabel');
-let stream=null,recorder=null,ac=null,analyser=null,frame=0,blobUrl=null,selected='hy',working=false,chunks=[],hasSpeech=false,lastSpeech=0,started=0,done=false,session=0;
+let stream=null,recorder=null,ac=null,analyser=null,frame=0,blobUrl=null,selected='hy',working=false,chunks=[],hasSpeech=false,lastSpeech=0,started=0,done=false,session=0,voiceReady=false;
 function report(t,warning=false){status.textContent=t;status.className=warning?'status alert':'status'}
 function buttons(busy){hy.disabled=busy;zh.disabled=busy;stop.disabled=!recorder||recorder.state!=='recording'}
 function clearResources(){if(frame)cancelAnimationFrame(frame);frame=0;if(ac){ac.close().catch(()=>{});ac=null}if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}analyser=null}
 function endRecording(){if(recorder&&recorder.state==='recording')recorder.stop()}
 function pickVoice(language){return speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(language==='hy'?'hy':'zh'))}
 function speak(text,language){return new Promise(resolve=>{
- if(!text||!window.speechSynthesis){resolve();return}
+ if(!text||text==='—'||!window.speechSynthesis){report('На устройстве нет доступного механизма озвучивания.',true);resolve();return}
  let finished=false;const finish=()=>{if(!finished){finished=true;resolve()}};
  speechSynthesis.cancel();
  const u=new SpeechSynthesisUtterance(text);u.lang=language==='hy'?'hy-AM':'zh-CN';u.rate=.88;
  const v=pickVoice(language);if(v)u.voice=v;
- u.onend=finish;u.onerror=()=>{report('Перевод готов, но автоматическая озвучка заблокирована или голос недоступен. Нажми «Озвучить».',true);finish()};
+ u.onstart=()=>report('🔊 Произношу перевод…');
+ u.onend=finish;u.onerror=()=>{report('Перевод готов, но Safari не воспроизвёл голос. Нажми «🔊 Озвучить» и проверь громкость.',true);finish()};
  speechSynthesis.speak(u);
- setTimeout(finish,16000);
+ setTimeout(()=>{if(!finished){if(!speechSynthesis.speaking)report('Safari не запустил автоматическую озвучку. Нажми «🔊 Озвучить».',true);finish()}},12000);
  })}
 async function translateText(text,language){
  const from=language==='hy'?'hy':'zh-CN',to=language==='hy'?'zh-CN':'hy';
@@ -65,7 +66,7 @@ async function start(language){
  try{
   if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder)throw Error('Браузер не поддерживает запись. Открой Safari');
   // Unlock audio output during a user gesture when possible.
-  if(window.speechSynthesis){speechSynthesis.cancel();speechSynthesis.getVoices()}
+  if(window.speechSynthesis){speechSynthesis.cancel();speechSynthesis.getVoices();voiceReady=true}
   stream=await navigator.mediaDevices.getUserMedia({audio:true});
   ac=new (window.AudioContext||window.webkitAudioContext)();
   await ac.resume();const src=ac.createMediaStreamSource(stream);
