@@ -16,3 +16,7 @@ Test: GET / returns `{"app":"Simaneli Talk","status":"online"}`.
 POST /transcribe expects multipart form with `file` (<=5 MB) and `language` ("hy" or "zh"). Returns JSON with `text`.
 
 **Before public launch:** add server-enforced rate limits / bot controls. Checking the Origin header and configuring CORS are *not* authorization and do not stop scripted abuse. An exposed public endpoint can use up the Groq free allowance. Speech recognition accuracy for Armenian is unverified. No speech translation or text-to-speech service is included yet. The frontend is not yet wired up to this API.
+
+## Deployment
+
+Cloudflare Builds linked to main. Deployment command: `npx wrangler deploy --config simaneli-talk-api/wrangler.toml`.
