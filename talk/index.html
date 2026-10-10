@@ -24,11 +24,11 @@ display()})();
 const $=id=>document.getElementById(id);
 const mic=$('mic'), voice=$('voice'), fallback=$('fallback');
 const note=document.createElement('div');note.className='notice';note.style.display='block';note.style.background='#e6f4f1';
-note.textContent='Автоматический режим: один раз нажми «Начать разговор». Приложение слушает короткие реплики, делает перевод и старается озвучить его. Для изменения языка собеседника нажми «Поменять языки». Аудио отправляется в Groq. Не используй для конфиденциальных разговоров.';
+note.textContent='🇦🇲 Говори по-армянски: приложение само распознает слова, переведёт на китайский и попробует произнести перевод. Одно нажатие для запуска, ещё одно — для остановки. Для китайского ответа нажми «Поменять языки». Запись отправляется в Groq, перевод — во внешний сервис. Не используй для секретных разговоров.';
 mic.before(note);
-const auto=document.createElement('button');auto.className='primary';auto.style.width='100%';auto.style.marginBottom='10px';auto.textContent='🟢 Начать автоматический разговор';note.after(auto);
+const auto=document.createElement('button');auto.className='primary';auto.style.width='100%';auto.style.marginBottom='10px';auto.textContent='🟢 Начать — армянский → китайский';note.before(auto);
 const player=document.createElement('audio');player.controls=true;player.style.width='100%';player.style.marginTop='10px';player.style.display='none';mic.after(player);
-const send=document.createElement('button');send.className='primary';send.style.width='100%';send.style.marginTop='10px';send.textContent='✨ Распознать и перевести';send.disabled=true;player.after(send);
+const send=document.createElement('button');send.className='primary';send.style.width='100%';send.style.marginTop='10px';send.textContent='↻ Повторить перевод записи';send.disabled=true;player.after(send);send.style.display='none';
 let stream=null, recorder=null, parts=[], lastBlob=null, autoOn=false, busy=false, analyser=null, ctx=null, raf=0, lastVoice=0, began=0, sawVoice=false, currentStop=null;
 const endpoint='https://simaneli-talk-api.sls097323232.workers.dev/transcribe';
 function setVoice(t){voice.textContent=t}
@@ -50,8 +50,8 @@ async function process(blob,automatic){
  const result=await tr.json();if(!tr.ok||result.responseStatus!==200||!result.responseData?.translatedText||/MYMEMORY WARNING/i.test(result.responseData.translatedText))throw Error('Перевод недоступен');
  const decoder=document.createElement('textarea');decoder.innerHTML=result.responseData.translatedText;
  const output=decoder.value;$('out').textContent=output;
- setVoice('✅ Перевод готов. Речь может распознаваться с ошибками — проверяй цены и цифры.');
- if(automatic&&'speechSynthesis' in window){
+ setVoice('✅ Перевод готов. Проверь текст и цифры.');
+ if('speechSynthesis' in window){
   speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(output);u.lang=to==='zh-CN'?'zh-CN':'hy-AM';u.rate=.9;
   const match=speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(to==='zh-CN'?'zh':'hy'));if(match)u.voice=match;
   speechSynthesis.speak(u);
@@ -75,18 +75,18 @@ function recordOnce(){
 async function startManual(){
  if(recorder&&recorder.state==='recording'){recorder.stop();return}
  if(autoOn)return;
- try{await getStream();setVoice('🎤 Записываю…');const blob=await recordOnce();stopStream();manualLabel();send.disabled=blob.size===0;player.src=URL.createObjectURL(blob);player.style.display='block';setVoice('Запись готова. Нажми «Распознать и перевести».')}
+ try{await getStream();setVoice('🎤 Записываю…');const blob=await recordOnce();stopStream();manualLabel();send.disabled=blob.size===0;player.src=URL.createObjectURL(blob);player.style.display='block';setVoice('⏳ Запись готова, перевожу автоматически…');await process(blob,true)}
  catch(err){stopStream();setVoice(err.message)}
 }
 mic.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();startManual()},true);
 send.onclick=()=>process(lastBlob,false);
 async function startAuto(){
- if(autoOn){autoOn=false;auto.textContent='🟢 Начать автоматический разговор';if(recorder&&recorder.state==='recording')recorder.stop();stopStream();setVoice('Автоматический режим остановлен.');return}
+ if(autoOn){autoOn=false;auto.textContent='🟢 Начать — армянский → китайский';if(recorder&&recorder.state==='recording')recorder.stop();stopStream();setVoice('Автоматический режим остановлен.');return}
  try{
   if('speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.getVoices()}
   await getStream();ctx=new (window.AudioContext||window.webkitAudioContext)();await ctx.resume();
   const source=ctx.createMediaStreamSource(stream);analyser=ctx.createAnalyser();analyser.fftSize=1024;source.connect(analyser);
-  autoOn=true;mic.disabled=true;auto.textContent='🔴 Остановить разговор';
+  autoOn=true;mic.disabled=true;auto.textContent='🔴 Остановить автоматический перевод';
   while(autoOn){
    parts=[];sawVoice=false;began=Date.now();lastVoice=began;
    const recording=recordOnce();setVoice('🎧 Слушаю… (по '+(lang()==='hy'?'армянски':'китайски')+')');
@@ -113,7 +113,7 @@ async function startAuto(){
    }
   }
  }catch(err){setVoice('Автоматический режим недоступен: '+err.message)}
- finally{autoOn=false;mic.disabled=false;auto.textContent='🟢 Начать автоматический разговор';stopStream();manualLabel()}
+ finally{autoOn=false;mic.disabled=false;auto.textContent='🟢 Начать — армянский → китайский';stopStream();manualLabel()}
 }
 auto.onclick=()=>startAuto();
 $('swap').addEventListener('click',()=>{if(autoOn){auto.click()}setVoice('Язык изменён. Нажми «Начать разговор», чтобы слушать собеседника.')});
