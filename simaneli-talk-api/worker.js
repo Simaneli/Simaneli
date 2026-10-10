@@ -63,8 +63,8 @@ export default {
       form.set("file", file);
       form.set("model", "whisper-large-v3");
       form.set("response_format", "json");
-      // Armenian may not be reliably recognized; automatic detection is used.
-      if (language === "zh") form.set("language", "zh");
+      // Specify the chosen language explicitly instead of auto-detection.
+      form.set("language", language);
       const upstream = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
         method: "POST",
         headers: { Authorization: "Bearer " + env.GROQ_API_KEY },
