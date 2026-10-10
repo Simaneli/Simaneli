@@ -24,7 +24,7 @@ function speak(text,language){return new Promise(resolve=>{
  let finished=false;const finish=()=>{if(!finished){finished=true;resolve()}};
  speechSynthesis.cancel();
  const u=new SpeechSynthesisUtterance(text);u.lang=language==='hy'?'hy-AM':'zh-CN';u.rate=.88;
- const v=pickVoice(language);if(v)u.voice=v;else report('На iPhone не найден голос '+(language==='zh'?'китайского':'армянского')+' языка. Проверь установленные голоса iOS.',true);
+ const v=pickVoice(language);if(v)u.voice=v;else if(language==='hy'){report('Армянский текст готов, но на этом iPhone не найден армянский голос. Для автоматической озвучки требуется внешний голосовой сервис.',true);finish();return;}else report('Китайский голос на iPhone не найден. Проверь настройки речи iOS.',true);
  u.onstart=()=>report('🔊 Произношу перевод…');
  u.onend=finish;u.onerror=()=>{report('Перевод готов, но Safari не воспроизвёл голос. Нажми «🔊 Озвучить» и проверь громкость.',true);finish()};
  speechSynthesis.speak(u);
