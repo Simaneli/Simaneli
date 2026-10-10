@@ -198,4 +198,17 @@ el("copywechat").onclick=async()=>{try{await navigator.clipboard.writeText("+861
 document.addEventListener("visibilitychange",()=>{if(document.hidden)stopRecording()});
 })();
 </script>
-</body></html>
+<script id="simaneli-speech-unlock">
+// A genuine tap can unlock speech synthesis on iOS Safari.
+document.addEventListener('pointerdown',function(e){
+  if(!e.target.closest('#hy,#zh'))return;
+  try{
+    if(!window.speechSynthesis)return;
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(' ');
+    u.lang='zh-CN';u.volume=0;
+    speechSynthesis.speak(u);
+    if(speechSynthesis.paused)speechSynthesis.resume();
+  }catch(_){}
+},true);
+</script></body></html>
