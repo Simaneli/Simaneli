@@ -40,18 +40,49 @@ h1{margin:0;text-shadow:0 2px 12px #ae782580}
 .mic{width:75px;height:75px}
 .output{min-height:115px}
 @media(max-width:380px){.mic{width:65px;height:65px}.flagbtn{font-size:12px}.toplinks a{font-size:14px}}
+
+body{background:#020b14;color:#fff1d7;font-family:Georgia,serif}
+.shell{max-width:680px;padding:0 13px 36px;background:linear-gradient(#06192c,#020913)}
+header{position:relative;height:260px;padding:0;margin:0 -13px;overflow:hidden;border:0}
+header:before{display:none}
+.landscape{width:100%;height:100%;position:absolute;inset:0}
+.headcontent{position:relative;text-align:center;padding-top:68px;text-shadow:0 3px 7px #020a11,0 0 17px #050a0f}
+h1{font-size:clamp(37px,7.5vw,54px);margin:0;color:#f8d793;font-weight:bold;text-shadow:0 3px 3px #432609,0 0 17px #e3a64c66}
+.subtitle{font:clamp(12px,2.8vw,17px) Georgia,serif;color:#ffecbb;margin-top:15px}
+.toplinks{margin:0 0 13px;display:grid;grid-template-columns:1.65fr 1fr;gap:9px}
+.toplinks a{border:2px solid #f1ba54;border-radius:28px;padding:10px 6px;display:flex;align-items:center;justify-content:center;font:clamp(12px,3vw,17px) Georgia,serif;box-shadow:0 0 12px #e8b75c55,inset 0 0 4px #e8b75c33;text-align:center;min-height:51px;white-space:nowrap}
+.card{border:3px double #f2b953;outline:1px solid #a86c2c;outline-offset:-7px;background:radial-gradient(ellipse at 50% -30%,#112d40 0,#061c30 55%,#030f1d 100%);border-radius:21px;box-shadow:0 0 15px #b8874099, inset 0 0 14px #cf923d33;margin:16px 0;padding:22px 18px}
+.card h2{font-size:clamp(22px,5.4vw,32px);font-weight:bold;color:#ffe2a1;text-shadow:0 1px 2px #c47f335e}
+.hint{font:clamp(12px,3vw,17px)/1.65 Georgia,serif;color:#f7e6cb}
+.languages{gap:4px;align-items:center;margin:10px 0 0}
+.flagbtn{padding:0;border:0;background:none;box-shadow:none!important;border-radius:0;color:#ffe4aa;display:flex;flex-direction:column;align-items:center;gap:10px;font:clamp(12px,3vw,16px) Georgia,serif}
+.flagbtn[aria-pressed=true] .langlabel{box-shadow:0 0 14px #e8b75c88}
+.flagbtn:focus-visible .flagCircle{outline:3px solid white}
+.flagCircle{display:block;width:clamp(75px,20vw,125px);height:clamp(75px,20vw,125px);border:3px solid #ffcd6c;border-radius:50%;box-shadow:0 0 17px #edb453b3, inset 0 0 12px #fff5c477;overflow:hidden}
+.flagCircle.armenian{background:linear-gradient(to bottom,#e52228 0 33.33%,#0033a0 33.33% 66.66%,#f2a800 66.66% 100%)}
+.flagCircle.china{background:radial-gradient(circle at 30% 22%,#f02c20,#c00000);position:relative;color:#ffdd29;text-align:left}
+.flagCircle.china span{position:absolute;top:10%;left:15%;font:clamp(27px,7vw,45px) system-ui}
+.flagCircle.china small{position:absolute;top:10%;left:52%;font:11px system-ui;width:20px;line-height:1.1;transform:rotate(15deg)}
+.langlabel{border:1px solid #f1c16a;border-radius:25px;padding:8px 5px;width:100%;background:#081e32;box-shadow:inset 0 0 3px #ab7d45;white-space:nowrap}
+.mic{align-self:center;min-width:0;flex:0 0 clamp(64px,19vw,125px);width:clamp(64px,19vw,125px);height:clamp(100px,27vw,166px);border:none;background:transparent;box-shadow:none;position:relative;font-size:clamp(43px,11vw,75px);filter:drop-shadow(0 0 8px #fac76ca3)}
+.micSymbol{position:relative;z-index:1}.soundwave{display:none}
+.mic.listening{box-shadow:none;animation:pulse 1s infinite}
+.controls{margin-top:19px}
+button.secondary{background:linear-gradient(#0b263b,#071728);border:1px solid #f4c26b;border-radius:29px;padding:13px 20px;font:clamp(12px,3vw,17px) Georgia,serif;box-shadow:0 0 4px #a87c4f}
+#status{font:clamp(12px,2.9vw,17px) Georgia,serif;color:#f7dca8;border:1px solid #9e773c;border-radius:25px;padding:9px 6px;margin-top:12px;min-height:0}
+.output{background:#031220;border:1px solid #cf9a43;min-height:105px;font-size:clamp(14px,3.5vw,19px)}
+.resultcard{min-height:195px}
+.resultcard .output{min-height:105px}
+.tiny{border-color:#c3944b}
+@media(max-width:370px){.card{padding:15px 11px}.mic{font-size:39px}.toplinks{gap:5px}.toplinks a{font-size:11px;padding:8px 3px}}
 </style></head>
 <body><main class="shell">
-<header><h1>Simaneli Talk</h1><p class="subtitle">🇦🇲 Армянский　⇄　Китайский 🇨🇳</p>
-<nav class="toplinks"><a href="https://simaneli.github.io/Simaneli/" target="_blank" rel="noopener">🛒 Интернет-магазин Simaneli</a><a href="https://www.instagram.com/" target="_blank" rel="noopener" id="instagram">📸 Instagram</a></nav></header>
+<header><svg class="landscape" viewBox="0 0 900 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#06152b"/><stop offset=".65" stop-color="#15344c"/><stop offset="1" stop-color="#a36a31"/></linearGradient><linearGradient id="hills" x2="0" y2="1"><stop stop-color="#142a3c"/><stop offset="1" stop-color="#050e16"/></linearGradient></defs><rect width="900" height="340" fill="url(#sky)"/><circle cx="457" cy="310" r="120" fill="#d89a4e" opacity=".16"/><path d="M0 230 65 170 117 209 174 62 239 195 286 148 370 258H0Z" fill="#2b4052"/><path d="M104 190 174 62 225 170 196 151 176 108 158 144 142 139Z" fill="#e9d2a1"/><path d="M0 280 93 203 164 247 251 191 329 259 430 220 510 289H0Z" fill="#0b2634"/><path d="M0 340V274L105 259 173 284 247 255 331 295 412 270 517 317 590 273 680 304 742 245 835 276 900 244V340Z" fill="url(#hills)"/><g stroke="#dc9d43" stroke-width="3" fill="#111d29"><path d="M25 250v-55h31v55m-37-55 21-29 22 29m50 80v-68h50v68m-59-68 34-32 33 32"/><path d="M89 280h100v-11H89zM140 270v-92l19-21 19 21v92"/><path d="M100 207h84" stroke-width="5"/></g><g fill="#080f18" stroke="#bf8739" stroke-width="2"><path d="M580 317 633 273 678 292 728 238 779 255 821 201 900 216v19l-72-7-45 57-53-9-46 36-47-8-33 33Z"/><path d="M755 235v-61h50v61m-10-61 34-17-51 4-28-7 28 18m-7-29 9-8 10 8m55 85v-72h46v72m-51-72 74-11-38 18-43-5"/></g><path d="M0 324Q215 313 410 324T900 319" fill="none" stroke="#e8b75c" stroke-width="3"/><g fill="#eab85c" opacity=".9"><circle cx="670" cy="70" r="3"/><circle cx="690" cy="83" r="4"/><circle cx="707" cy="65" r="3"/><circle cx="727" cy="80" r="4"/><circle cx="745" cy="66" r="3"/></g></svg><div class="headcontent"><h1>Simaneli Talk</h1><p class="subtitle">🇦🇲 Армянский　⇄　Китайский 🇨🇳</p></div></header><nav class="toplinks"><a href="https://simaneli.github.io/Simaneli/" target="_blank" rel="noopener">🛒 Интернет-магазин Simaneli ↗</a><a href="https://www.instagram.com/" target="_blank" rel="noopener" id="instagram">📸 Instagram</a></nav>
 <section class="card"><h2>Кто сейчас говорит?</h2><p class="hint">Выберите язык, затем нажмите на микрофон и говорите. После паузы появится распознанная речь и её перевод.</p>
-<div class="languages"><button id="hy" class="flagbtn" aria-pressed="true"><span class="flag">🇦🇲</span>Армянский</button>
-<button class="mic" id="mic" title="Начать или остановить запись" aria-label="Начать запись">🎙</button>
-<button id="zh" class="flagbtn" aria-pressed="false"><span class="flag">🇨🇳</span>Китайский</button></div>
-<div class="controls"><button class="secondary" id="stop">■ Остановить запись</button><button class="secondary" id="swap">⇄ Сменить язык</button></div>
+<div class="languages"><button id="hy" class="flagbtn" aria-pressed="true"><span class="flagCircle armenian"></span><span class="langlabel">🇦🇲 Армянский</span></button><button class="mic" id="mic" title="Начать или остановить запись" aria-label="Начать запись"><span class="micSymbol">🎙</span><span class="soundwave">⌁</span></button><button id="zh" class="flagbtn" aria-pressed="false"><span class="flagCircle china"><span>★</span><small>★★★★</small></span><span class="langlabel">🇨🇳 Китайский</span></button></div><div class="controls"><button class="secondary" id="stop">■ Остановить запись</button><button class="secondary" id="swap">⇄ Сменить язык</button></div>
 <div id="status" role="status">Готов к разговору. Выберите язык и нажмите микрофон.</div></section>
-<section class="card"><div class="outbar"><h2>Распознанная речь</h2><button id="copySource" class="tiny">Копировать</button></div><div id="source" class="output" lang="hy" contenteditable="true" role="textbox" aria-label="Распознанная речь; можно исправить вручную"></div><div class="controls"><button id="translate" class="secondary">Перевести текст</button></div></section>
-<section class="card"><div class="outbar"><h2>Перевод</h2><button id="copyTarget" class="tiny">Копировать</button></div><div id="target" class="output" lang="zh"></div><div class="controls"><button class="secondary" id="speak">🔊 Озвучить перевод</button></div></section>
+<section class="card resultcard"><div class="outbar"><h2>📄 Распознанная речь</h2><button id="copySource" class="tiny">Копировать</button></div><div id="source" class="output" lang="hy" contenteditable="true" role="textbox" aria-label="Распознанная речь; можно исправить вручную"></div><div class="controls"><button id="translate" class="secondary">Перевести текст</button></div></section>
+<section class="card resultcard"><div class="outbar"><h2>⚑ Перевод</h2><button id="copyTarget" class="tiny">Копировать</button></div><div id="target" class="output" lang="zh"></div><div class="controls"><button class="secondary" id="speak">🔊 Озвучить перевод</button></div></section>
 <footer>При использовании распознавания речи браузер может передавать звук своему поставщику службы. Для перевода текст передаётся во внешний сервис MyMemory. Не используйте для конфиденциальной информации. Работа распознавания и голосов зависит от браузера и устройства.</footer>
 </main>
 <script>
