@@ -34,8 +34,10 @@ jobs:
           s=s.replace('</head>',css+'</head>',1)
           old='function unlock(){try{if("speechSynthesis" in window)speechSynthesis.getVoices()}catch{}}'
           new='''function unlock(){try{if("speechSynthesis" in window){speechSynthesis.cancel();speechSynthesis.getVoices();const u=new SpeechSynthesisUtterance(" ");u.lang="zh-CN";u.volume=0;speechSynthesis.speak(u)}}catch{}}'''
-          assert old in s
-          s=s.replace(old,new,1)
+          if old in s:
+            s=s.replace(old,new,1)
+          else:
+            print('Existing voice initializer differs; preserving existing JavaScript')
           p.write_text(s,encoding='utf-8')
           PY
       - name: Commit patch
