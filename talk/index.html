@@ -22,8 +22,29 @@ display()})();
 </script><script>
 (()=>{
 const mic=document.getElementById('mic'),voice=document.getElementById('voice'),fallback=document.getElementById('fallback');
-const note=document.createElement('div');note.className='notice';note.style.display='block';note.style.background='#e6f4f1';note.textContent='Новая проверка: запись хранится только на этом телефоне и не отправляется на сервер. После записи нажми ▶, чтобы услышать себя. Автоматическое распознавание аудио пока не подключено.';mic.after(note);
+const note=document.createElement('div');note.className='notice';note.style.display='block';note.style.background='#e6f4f1';note.textContent='Запиши фразу, затем нажми «Распознать голос». Только после нажатия запись отправится в Groq через сервер Cloudflare. Не записывай конфиденциальные разговоры.';mic.after(note);
 const player=document.createElement('audio');player.controls=true;player.style.width='100%';player.style.marginTop='10px';player.style.display='none';note.after(player);
+const send=document.createElement('button');send.className='primary';send.style.width='100%';send.style.marginTop='10px';send.textContent='✨ Распознать голос';send.disabled=true;player.after(send);
+let lastBlob=null;
+send.onclick=async()=>{
+ if(!lastBlob)return;
+ send.disabled=true;send.textContent='⏳ Распознаём…';voice.textContent='Отправляю аудио на сервер для распознавания…';
+ try{
+  const form=new FormData();
+  const type=lastBlob.type||'audio/mp4';
+  const ext=type.includes('mp4')?'m4a':type.includes('webm')?'webm':'wav';
+  form.append('file',new File([lastBlob],'voice.'+ext,{type}));
+  const lang=document.getElementById('from').textContent.includes('Հայերեն')?'hy':'zh';
+  form.append('language',lang);
+  const response=await fetch('https://simaneli-talk-api.sls097323232.workers.dev/transcribe',{method:'POST',body:form});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||('HTTP '+response.status));
+  if(!data.text)throw new Error('Сервис не распознал речь. Попробуй ещё раз.');
+  document.getElementById('input').value=data.text;
+  voice.textContent='✅ Текст распознан. Проверь его, затем нажми «Перевести →».';
+ }catch(err){voice.textContent='Ошибка распознавания: '+err.message+'. Можно ввести текст вручную.'}
+ finally{send.disabled=false;send.textContent='✨ Распознать голос'}
+};
 let recorder=null,stream=null,chunks=[],url=null;
 function reset(){mic.textContent='🎙️ Записать голос (тест)';mic.style.background='#25878b';}
 reset();
@@ -34,10 +55,10 @@ if(recorder&&recorder.state==='recording'){recorder.stop();return}
 if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){voice.textContent='Запись микрофона недоступна в этом браузере. Открой сайт в Safari.';return}
 try{
 stream=await navigator.mediaDevices.getUserMedia({audio:true});
-chunks=[];if(url){URL.revokeObjectURL(url);url=null}
+chunks=[];lastBlob=null;send.disabled=true;if(url){URL.revokeObjectURL(url);url=null}
 let rec=new MediaRecorder(stream);recorder=rec;
 rec.ondataavailable=x=>{if(x.data.size)chunks.push(x.data)};
-rec.onstop=()=>{let blob=new Blob(chunks,{type:rec.mimeType||'audio/mp4'});url=URL.createObjectURL(blob);player.src=url;player.style.display='block';voice.textContent='Запись готова. Нажми ▶ для прослушивания. Для перевода записи потребуется сервер.';stream?.getTracks().forEach(t=>t.stop());stream=null;recorder=null;reset()};
+rec.onstop=()=>{let blob=new Blob(chunks,{type:rec.mimeType||'audio/mp4'});lastBlob=blob;send.disabled=blob.size===0||blob.size>5*1024*1024;url=URL.createObjectURL(blob);player.src=url;player.style.display='block';voice.textContent=send.disabled?'Запись слишком большая или пустая. Запиши короткую фразу до 5 МБ.':'Запись готова. Нажми «Распознать голос», затем «Перевести». ';stream?.getTracks().forEach(t=>t.stop());stream=null;recorder=null;reset()};
 rec.start();voice.textContent='Запись идёт… Говори на армянском или китайском.';fallback.style.display='none';mic.textContent='⏹ Завершить запись';mic.style.background='#ba5538';
 }catch(err){voice.textContent='Микрофон не открылся: '+(err.name||'')+'. Проверь настройки Safari → Микрофон.';fallback.style.display='block';reset()}
 },true);
