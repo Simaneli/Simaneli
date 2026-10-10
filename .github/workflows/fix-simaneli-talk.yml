@@ -18,23 +18,34 @@ jobs:
           p=Path('talk/index.html')
           s=p.read_text(encoding='utf-8')
           assert 'function unlock()' in s and 'id="source"' in s
+          import re
           css="""
           <style id="simaneli-voice-fixes">
-          /* Separate live text and audio controls from the static illustration */
-          #source{top:71.7%!important;height:2.8%!important;resize:none!important}
-          #target{top:82.7%!important;height:2.8%!important;overflow:auto!important}
-          #status{top:60.3%!important;height:2.3%!important;left:13%!important;width:74%!important;background:#061728f2;border-radius:14px;font-size:12px!important;z-index:3}
-          #actions{top:87.2%!important;z-index:4;gap:8px}
-          #actions button{font-size:12px!important;white-space:nowrap}
-          #recording{position:static!important;margin:0 auto!important;width:88%!important;text-align:center}
-          #recording audio{display:block;width:100%;max-width:420px;margin:8px auto;height:34px}
+          #source{top:71.7%!important;height:3.2%!important;resize:none!important;background:#061629!important;z-index:3}
+          #target{top:82.7%!important;height:3.2%!important;background:#061629!important;overflow:auto!important;z-index:3}
+          #status{position:static!important;top:auto!important;left:auto!important;width:100%!important;height:auto!important;min-height:34px;margin:10px auto!important;padding:9px!important;background:#092238!important;border:1px solid #ba904f;border-radius:14px;color:#f0d5a2!important;font-size:13px!important}
+          #actions{position:static!important;top:auto!important;left:auto!important;transform:none!important;width:100%!important;display:flex!important;justify-content:center!important;gap:10px!important;margin:12px auto!important}
+          #actions button{font-size:13px!important;white-space:nowrap}
+          #recording{position:static!important;top:auto!important;left:auto!important;width:100%!important;margin:8px auto!important}
+          #recording audio{display:block;width:100%;max-width:420px;margin:8px auto;height:36px}
           #recording audio[hidden]{display:none}
-          @media(max-width:390px){#actions button{font-size:10px!important;padding:4px 7px!important}}
+          #footer{padding:14px!important}
+          @media(max-width:390px){#actions button{font-size:11px!important;padding:8px!important}}
           </style>"""
-          if 'id="simaneli-voice-fixes"' not in s:
+          if 'id="simaneli-voice-fixes"' in s:
+            s=re.sub(r'<style id="simaneli-voice-fixes">.*?</style>',css.strip(),s,count=1,flags=re.S)
+          else:
             s=s.replace('</head>',css+'</head>',1)
+          relocation="""<script id="simaneli-layout-relocation">
+          (function(){
+            const footer=document.getElementById('footer');
+            if(!footer)return;
+            ['status','recording','actions'].forEach(id=>{const el=document.getElementById(id);if(el)footer.insertBefore(el,footer.firstChild)});
+          })();
+          </script>"""
+          if 'id="simaneli-layout-relocation"' not in s:
+            s=s.replace('</body>',relocation+'</body>',1)
           voice_hook = """<script id="simaneli-speech-unlock">
-          // A genuine tap can unlock speech synthesis on iOS Safari.
           document.addEventListener('pointerdown',function(e){
             if(!e.target.closest('#hy,#zh'))return;
             try{
@@ -62,5 +73,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add talk/index.html
-          git commit -m "Fix overlay positions and prime iPhone speech synthesis"
+          git diff --cached --quiet || git commit -m "Separate speech controls and fix overlap"
           git push
