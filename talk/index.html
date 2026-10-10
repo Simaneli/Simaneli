@@ -1,122 +1,105 @@
-<!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#103945"><title>Simaneli Talk — Հայերեն ↔ 中文</title>
-<style>
-*{box-sizing:border-box}body{margin:0;background:#eef5f5;font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#173642}main{max-width:560px;margin:auto;padding:20px 15px 40px}h1{font-size:27px;margin:8px 0}p{line-height:1.5}.sub,.small{color:#647f8c;font-size:14px}.card{background:#fff;border-radius:22px;padding:19px;margin:14px 0;box-shadow:0 5px 25px #1a45400c}h2{font-size:20px;margin:4px 0 12px}button{border:0;border-radius:15px;padding:14px 18px;font:600 16px inherit;cursor:pointer;background:#e5f1f1;color:#173642}button:disabled{opacity:.5}button.primary{background:#25878b;color:white}.mic{display:block;width:100%;background:#25878b;color:white;font-size:20px;padding:19px;margin:14px 0}.orange{background:#cf663d}.tools{display:flex;gap:8px;margin-top:12px}.tools button{flex:1;font-weight:650}textarea{width:100%;min-height:110px;padding:14px;border:1px solid #d1e3e5;border-radius:15px;font:18px -apple-system,sans-serif;resize:vertical}.result{min-height:68px;white-space:pre-wrap;font-size:24px;line-height:1.5;overflow-wrap:anywhere}.swap{display:block;margin:12px auto;background:#173f50;color:white}.notice{padding:12px;background:#fff1da;border-radius:12px;font-size:13px;line-height:1.5;display:none}.chips{display:flex;gap:8px;flex-wrap:wrap}.chips button{font-size:13px;padding:10px}.tag{font-size:13px;color:#50777c}.status{margin-top:10px;font-size:13px;color:#557380;min-height:20px}footer{color:#66808a;font-size:12px;line-height:1.6;margin-top:22px}
-</style></head><body><main><header><h1>🌐 Simaneli Talk</h1><div class="sub">🇦🇲 Հայերեն ↔ 中文 🇨🇳 · Голосовой переводчик</div></header>
-<section class="card"><div class="tag">Говорящий</div><h2 id="from">🇦🇲 Հայերեն · Армянский</h2><button id="mic" class="mic">🎤 Говорить по-армянски</button><div id="voice" class="status">Нажми на микрофон или введи текст.</div><div id="fallback" class="notice">На этом iPhone или в этом браузере автоматическое распознавание голоса недоступно. Нажми на поле текста и используй диктовку 🎙️ на клавиатуре iPhone, если нужный язык поддерживается.</div><textarea id="input" placeholder="Напиши или произнеси фразу"></textarea><div class="tools"><button id="translate" class="primary">Перевести →</button><button id="clear">Очистить</button></div></section>
-<button id="swap" class="swap">⇅ Поменять языки</button>
-<section class="card"><div class="tag">Перевод</div><h2 id="to">🇨🇳 中文 · Китайский</h2><div id="out" class="result">Перевод появится здесь</div><div class="tools"><button id="speak" class="primary">🔊 Озвучить</button><button id="copy">Копировать</button></div><div id="status" class="status">Для автоматического перевода нужен интернет.</div></section>
-<section class="card"><div class="tag">Готовые фразы для фабрик и рынков</div><div id="chips" class="chips"></div></section>
-<footer>Тестовая версия. Автоматический перевод выполняет внешний сервис MyMemory; он может быть недоступен или ошибаться. Не вводи пароли, банковские реквизиты и конфиденциальные сведения. Для важных цен, размеров и адресов проверяй перевод.</footer>
-</main><script>
-(()=>{const $=id=>document.getElementById(id);let armenian=true;let spoken='';let recognition=null;
-const phraseData=[['Здравствуйте','Բարեւ ձեզ','您好'],['Сколько стоит?','Որքա՞ն արժե։','多少钱？'],['Какая оптовая цена?','Որքա՞ն է մեծածախ գինը։','批发价是多少？'],['Где находится фабрика?','Որտե՞ղ է գործարանը։','工厂在哪里？'],['Есть другие цвета?','Այլ գույներ կա՞ն։','有其他颜色吗？'],['Минимальный заказ?','Նվազագույն պատվերը որքա՞ն է։','最小起订量是多少？'],['Напишите цену','Խնդրում եմ, գրեք գինը։','请把价格写下来。'],['Спасибо','Շնորհակալություն։','谢谢。']];
-function status(s){$('status').textContent=s}function display(){if(recognition){try{recognition.stop()}catch(e){}recognition=null}$('from').textContent=armenian?'🇦🇲 Հայերեն · Армянский':'🇨🇳 中文 · Китайский';$('to').textContent=armenian?'🇨🇳 中文 · Китайский':'🇦🇲 Հայերեն · Армянский';$('mic').textContent=armenian?'🎤 Говорить по-армянски':'🎤 用中文说话';$('mic').className='mic'+(armenian?'':' orange');$('input').value='';spoken='';$('out').textContent='Перевод появится здесь';$('fallback').style.display='none';$('voice').textContent='Нажми на микрофон или введи текст.';renderChips()}
-function renderChips(){$('chips').replaceChildren();phraseData.forEach(([ru,hy,zh])=>{const b=document.createElement('button');b.textContent=ru;b.onclick=()=>{$('input').value=armenian?hy:zh;spoken=armenian?zh:hy;$('out').textContent=spoken;status('Готовая проверенная фраза из словаря.');};$('chips').append(b)})}
-$('swap').onclick=()=>{armenian=!armenian;display()};$('clear').onclick=()=>{$('input').value='';spoken='';$('out').textContent='Перевод появится здесь';status('Очищено.')};
-$('mic').onclick=()=>{if(!window.isSecureContext){$('fallback').style.display='block';$('voice').textContent='Для микрофона открой HTTPS-ссылку в Safari.';return}const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$('fallback').style.display='block';$('voice').textContent='Распознавание речи не поддерживается этим браузером.';return}if(recognition){recognition.stop();return}try{const r=new SR();recognition=r;r.lang=armenian?'hy-AM':'zh-CN';r.continuous=false;r.interimResults=false;r.onresult=e=>{$('input').value=e.results[0][0].transcript;$('voice').textContent='Фраза распознана. Нажми «Перевести».'};r.onerror=e=>{$('fallback').style.display='block';$('voice').textContent='Ошибка голосового ввода: '+e.error};r.onend=()=>{recognition=null;$('mic').textContent=armenian?'🎤 Говорить по-армянски':'🎤 用中文说话'};r.start();$('voice').textContent='Слушаю…';$('mic').textContent='⏹ Остановить'}catch(e){recognition=null;$('fallback').style.display='block';$('voice').textContent='Не удалось открыть микрофон: '+e.message}};
-$('translate').onclick=async()=>{const q=$('input').value.trim();if(!q){status('Сначала введи фразу.');return}if(q.length>450){status('Максимум 450 символов.');return}const known=phraseData.find(p=>p[armenian?1:2]===q);if(known){spoken=known[armenian?2:1];$('out').textContent=spoken;status('Перевод из словаря.');return}const from=armenian?'hy':'zh-CN',to=armenian?'zh-CN':'hy';$('translate').disabled=true;status('Переводим…');try{const r=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(q)+'&langpair='+encodeURIComponent(from+'|'+to));if(!r.ok)throw Error('Сервис недоступен');const d=await r.json();if(d.responseStatus!==200||!d.responseData?.translatedText||/MYMEMORY WARNING/i.test(d.responseData.translatedText))throw Error('Нет перевода');const el=document.createElement('textarea');el.innerHTML=d.responseData.translatedText;spoken=el.value;$('out').textContent=spoken;status('Машинный перевод: проверь цифры и суммы.')}catch(e){status('Ошибка: '+e.message+'. Проверь интернет или попробуй позже.')}finally{$('translate').disabled=false}};
-$('speak').onclick=()=>{if(!spoken){status('Сначала переведи фразу.');return}if(!('speechSynthesis' in window)){status('Озвучивание не поддерживается на устройстве.');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(spoken);u.lang=armenian?'zh-CN':'hy-AM';u.rate=.87;const voice=speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(armenian?'zh':'hy'));if(voice)u.voice=voice;else status('Голос для этого языка может отсутствовать.');speechSynthesis.speak(u)};
-$('copy').onclick=async()=>{if(!spoken)return;try{await navigator.clipboard.writeText(spoken);status('Скопировано.')}catch(e){status('Не удалось скопировать.')}};
-display()})();
-</script><script>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#114451"><title>Simaneli Talk | Հայերեն ↔ 中文</title><style>
+*{box-sizing:border-box}body{margin:0;background:#edf5f5;color:#173743;font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:620px;margin:auto;padding:22px 16px 44px}h1{font-size:29px;margin:10px 0 5px}h2{font-size:20px;margin:4px 0 13px}.muted{color:#637e87}.card{border-radius:24px;background:white;padding:19px;margin-top:16px;box-shadow:0 5px 16px #00000008}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:16px}button{font:inherit;border:0;border-radius:18px;padding:15px 10px;font-weight:650;cursor:pointer}button:disabled{opacity:.5}.hy{background:#32898c;color:white}.zh{background:#db693d;color:white}.active{outline:4px solid #a6ced0}.minor{background:#e4eff0;color:#1c4651}.full{width:100%;margin-top:12px}.label{color:#66848b;font-size:13px;margin:13px 0 5px}.big{font-size:22px;white-space:pre-wrap;overflow-wrap:anywhere;min-height:47px;line-height:1.5}.status{padding:13px;background:#e5f2ef;border-radius:14px;line-height:1.5;margin-top:16px}.alert{background:#fff3dd}.tiny{font-size:13px;line-height:1.55;color:#657d84;margin-top:18px}textarea{width:100%;min-height:90px;border:1px solid #d2e4e5;border-radius:12px;padding:12px;font:18px -apple-system,sans-serif}.bottom{display:flex;gap:10px;margin-top:14px}.bottom button{flex:1}audio{width:100%;margin-top:14px}
+</style></head><body><main><h1>🌐 Simaneli Talk</h1><div class="muted">🇦🇲 Հայերեն ↔ 中文 🇨🇳</div>
+<section class="card"><h2>Кто сейчас говорит?</h2><p class="muted">Нажми язык один раз и говори. После паузы приложение само распознает, переведёт и попытается озвучить перевод.</p>
+<div class="buttons"><button id="hy" class="hy">🇦🇲 Армянский<br>Հայերեն 🎤</button><button id="zh" class="zh">🇨🇳 Китайский<br>中文 🎤</button></div>
+<button class="minor full" id="stop" disabled>⏹ Остановить запись</button><div class="status" id="status" role="status">Готово к разговору. Нажми кнопку языка.</div><audio controls id="audio" hidden></audio></section>
+<section class="card"><div class="label">Распознанная речь</div><textarea id="source" placeholder="Здесь появится текст речи. Его можно исправить."></textarea>
+<div class="label" id="targetlabel">Перевод</div><div id="target" class="big">—</div>
+<div class="bottom"><button id="translate" class="minor">↻ Перевести текст</button><button id="speak" class="hy">🔊 Озвучить</button></div>
+</section><div class="tiny">Тестовая версия. Аудио отправляется в Groq через Cloudflare; текст для перевода — во внешний сервис. Не записывай конфиденциальные сведения. Ошибки армянской речи возможны: проверяй суммы, адреса и количество. На iPhone автоматическая озвучка может быть ограничена Safari; тогда нажми «Озвучить».</div></main>
+<script>
 (()=>{
-const $=id=>document.getElementById(id);
-const mic=$('mic'), voice=$('voice'), fallback=$('fallback');
-const note=document.createElement('div');note.className='notice';note.style.display='block';note.style.background='#e6f4f1';
-note.textContent='🇦🇲 Говори по-армянски: приложение само распознает слова, переведёт на китайский и попробует произнести перевод. Одно нажатие для запуска, ещё одно — для остановки. Для китайского ответа нажми «Поменять языки». Запись отправляется в Groq, перевод — во внешний сервис. Не используй для секретных разговоров.';
-mic.before(note);
-const auto=document.createElement('button');auto.className='primary';auto.style.width='100%';auto.style.marginBottom='10px';auto.textContent='🟢 Начать — армянский → китайский';note.before(auto);
-const player=document.createElement('audio');player.controls=true;player.style.width='100%';player.style.marginTop='10px';player.style.display='none';mic.after(player);
-const send=document.createElement('button');send.className='primary';send.style.width='100%';send.style.marginTop='10px';send.textContent='↻ Повторить перевод записи';send.disabled=true;player.after(send);send.style.display='none';
-let stream=null, recorder=null, parts=[], lastBlob=null, autoOn=false, busy=false, analyser=null, ctx=null, raf=0, lastVoice=0, began=0, sawVoice=false, currentStop=null;
-const endpoint='https://simaneli-talk-api.sls097323232.workers.dev/transcribe';
-function setVoice(t){voice.textContent=t}
-function lang(){return $('from').textContent.includes('Հայերեն')?'hy':'zh'}
-function stopStream(){if(raf)cancelAnimationFrame(raf);raf=0;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}if(ctx){ctx.close().catch(()=>{});ctx=null}analyser=null}
-function manualLabel(){mic.textContent=recorder&&recorder.state==='recording'?'⏹ Завершить запись':'🎙️ Записать голос';}
-async function process(blob,automatic){
- if(!blob||!blob.size||blob.size>5*1024*1024){setVoice('Запись пустая или слишком большая.');return false}
- busy=true;send.disabled=true;setVoice('⏳ Распознаю и перевожу…');
+const el=id=>document.getElementById(id), api='https://simaneli-talk-api.sls097323232.workers.dev/transcribe';
+const status=el('status'),hy=el('hy'),zh=el('zh'),stop=el('stop'),audio=el('audio'),source=el('source'),target=el('target'),targetlabel=el('targetlabel');
+let stream=null,recorder=null,ac=null,analyser=null,frame=0,blobUrl=null,selected='hy',working=false,chunks=[],hasSpeech=false,lastSpeech=0,started=0,done=false,session=0;
+function report(t,warning=false){status.textContent=t;status.className=warning?'status alert':'status'}
+function buttons(busy){hy.disabled=busy;zh.disabled=busy;stop.disabled=!recorder||recorder.state!=='recording'}
+function clearResources(){if(frame)cancelAnimationFrame(frame);frame=0;if(ac){ac.close().catch(()=>{});ac=null}if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}analyser=null}
+function endRecording(){if(recorder&&recorder.state==='recording')recorder.stop()}
+function pickVoice(language){return speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(language==='hy'?'hy':'zh'))}
+function speak(text,language){return new Promise(resolve=>{
+ if(!text||!window.speechSynthesis){resolve();return}
+ let finished=false;const finish=()=>{if(!finished){finished=true;resolve()}};
+ speechSynthesis.cancel();
+ const u=new SpeechSynthesisUtterance(text);u.lang=language==='hy'?'hy-AM':'zh-CN';u.rate=.88;
+ const v=pickVoice(language);if(v)u.voice=v;
+ u.onend=finish;u.onerror=()=>{report('Перевод готов, но автоматическая озвучка заблокирована или голос недоступен. Нажми «Озвучить».',true);finish()};
+ speechSynthesis.speak(u);
+ setTimeout(finish,16000);
+ })}
+async function translateText(text,language){
+ const from=language==='hy'?'hy':'zh-CN',to=language==='hy'?'zh-CN':'hy';
+ report('⏳ Перевожу…');targetlabel.textContent=language==='hy'?'🇨🇳 Перевод на китайский':'🇦🇲 Հայերեն — перевод на армянский';
+ const response=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair='+encodeURIComponent(from+'|'+to));
+ const data=await response.json();
+ if(!response.ok||data.responseStatus!==200||!data.responseData?.translatedText||/MYMEMORY WARNING/i.test(data.responseData.translatedText))throw Error('Сервис перевода временно недоступен');
+ const decoder=document.createElement('textarea');decoder.innerHTML=data.responseData.translatedText;
+ const translated=decoder.value;target.textContent=translated;
+ report('✅ Перевод готов. Пытаюсь озвучить…');
+ await speak(translated,language==='hy'?'zh':'hy');
+ if(!status.textContent.includes('озвучка заблокирована'))report('✅ Готово. Для ответа нажми кнопку второго языка.');
+}
+async function processRecording(blob,language,seq){
+ if(seq!==session)return;
  try{
- const fd=new FormData(),type=blob.type||'audio/mp4',ext=type.includes('mp4')?'m4a':'webm';
- fd.append('file',new File([blob],'voice.'+ext,{type}));fd.append('language',lang());
- const resp=await fetch(endpoint,{method:'POST',body:fd});const data=await resp.json().catch(()=>({}));
- if(!resp.ok)throw Error(data.error||('HTTP '+resp.status));
- if(!data.text)throw Error('Речь не распознана');
- $('input').value=data.text;
- const q=data.text,from=lang()==='hy'?'hy':'zh-CN',to=lang()==='hy'?'zh-CN':'hy';
- const tr=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(q)+'&langpair='+encodeURIComponent(from+'|'+to));
- const result=await tr.json();if(!tr.ok||result.responseStatus!==200||!result.responseData?.translatedText||/MYMEMORY WARNING/i.test(result.responseData.translatedText))throw Error('Перевод недоступен');
- const decoder=document.createElement('textarea');decoder.innerHTML=result.responseData.translatedText;
- const output=decoder.value;$('out').textContent=output;
- setVoice('✅ Перевод готов. Проверь текст и цифры.');
- if('speechSynthesis' in window){
-  speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(output);u.lang=to==='zh-CN'?'zh-CN':'hy-AM';u.rate=.9;
-  const match=speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(to==='zh-CN'?'zh':'hy'));if(match)u.voice=match;
-  speechSynthesis.speak(u);
- }
- return true;
- }catch(err){setVoice('Ошибка: '+err.message+'. Попробуй ещё раз.');return false}
- finally{busy=false;send.disabled=false}
+  if(!blob.size||blob.size>5*1024*1024)throw Error('Запись пустая или слишком большая');
+  report('⏳ Распознаю '+(language==='hy'?'армянскую':'китайскую')+' речь…');
+  const form=new FormData();const type=blob.type||'audio/mp4',ext=type.includes('mp4')?'m4a':'webm';
+  form.append('file',new File([blob],'voice.'+ext,{type}));form.append('language',language);
+  const response=await fetch(api,{method:'POST',body:form});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw Error(data.error||'Ошибка распознавания');
+  if(!data.text)throw Error('Речь не распознана');
+  if(seq!==session)return;
+  source.value=data.text;
+  await translateText(data.text,language);
+ }catch(e){report('Не получилось: '+e.message+'. Можно повторить или исправить текст вручную.',true)}
+ finally{working=false;buttons(false)}
 }
-async function getStream(){if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder)throw Error('Safari не поддерживает запись микрофона');stream=await navigator.mediaDevices.getUserMedia({audio:true});}
-function recordOnce(){
- return new Promise((resolve,reject)=>{
-  try{
-   parts=[];recorder=new MediaRecorder(stream);
-   recorder.ondataavailable=e=>{if(e.data.size)parts.push(e.data)};
-   recorder.onerror=e=>reject(Error('Ошибка записи'));
-   recorder.onstop=()=>{const blob=new Blob(parts,{type:recorder.mimeType||'audio/mp4'});recorder=null;lastBlob=blob;resolve(blob)};
-   recorder.start();manualLabel();
-  }catch(e){reject(e)}
- });
-}
-async function startManual(){
- if(recorder&&recorder.state==='recording'){recorder.stop();return}
- if(autoOn)return;
- try{await getStream();setVoice('🎤 Записываю…');const blob=await recordOnce();stopStream();manualLabel();send.disabled=blob.size===0;player.src=URL.createObjectURL(blob);player.style.display='block';setVoice('⏳ Запись готова, перевожу автоматически…');await process(blob,true)}
- catch(err){stopStream();setVoice(err.message)}
-}
-mic.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();startManual()},true);
-send.onclick=()=>process(lastBlob,false);
-async function startAuto(){
- if(autoOn){autoOn=false;auto.textContent='🟢 Начать — армянский → китайский';if(recorder&&recorder.state==='recording')recorder.stop();stopStream();setVoice('Автоматический режим остановлен.');return}
+async function start(language){
+ if(working||recorder)return;
+ session++;const seq=session;selected=language;working=true;
+ source.value='';target.textContent='—';targetlabel.textContent=language==='hy'?'🇨🇳 Перевод на китайский':'🇦🇲 Перевод на армянский';
+ hy.classList.toggle('active',language==='hy');zh.classList.toggle('active',language==='zh');
  try{
-  if('speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.getVoices()}
-  await getStream();ctx=new (window.AudioContext||window.webkitAudioContext)();await ctx.resume();
-  const source=ctx.createMediaStreamSource(stream);analyser=ctx.createAnalyser();analyser.fftSize=1024;source.connect(analyser);
-  autoOn=true;mic.disabled=true;auto.textContent='🔴 Остановить автоматический перевод';
-  while(autoOn){
-   parts=[];sawVoice=false;began=Date.now();lastVoice=began;
-   const recording=recordOnce();setVoice('🎧 Слушаю… (по '+(lang()==='hy'?'армянски':'китайски')+')');
-   await new Promise(resolve=>{
-    const data=new Uint8Array(analyser.fftSize);
-    function check(){
-     if(!autoOn||!recorder||recorder.state!=='recording'){resolve();return}
-     analyser.getByteTimeDomainData(data);
-     let sum=0;for(let i=0;i<data.length;i++){let d=(data[i]-128)/128;sum+=d*d}
-     const rms=Math.sqrt(sum/data.length),now=Date.now();
-     if(rms>.025){sawVoice=true;lastVoice=now}
-     if((sawVoice&&now-lastVoice>1100&&now-began>900)||now-began>12000){
-       recorder.stop();resolve();return
-     }
-     raf=requestAnimationFrame(check)
-    }
-    raf=requestAnimationFrame(check);
-   });
-   const blob=await recording;if(!autoOn)break;
-   if(sawVoice&&blob.size){await process(blob,true)}
-   // Wait for speech playback to finish where browser supports it.
-   if('speechSynthesis'in window&&speechSynthesis.speaking){
-    await new Promise(resolve=>{const start=Date.now();const poll=()=>{if(!autoOn||!speechSynthesis.speaking||Date.now()-start>15000){resolve();return}setTimeout(poll,250)};poll()});
-   }
+  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder)throw Error('Браузер не поддерживает запись. Открой Safari');
+  // Unlock audio output during a user gesture when possible.
+  if(window.speechSynthesis){speechSynthesis.cancel();speechSynthesis.getVoices()}
+  stream=await navigator.mediaDevices.getUserMedia({audio:true});
+  ac=new (window.AudioContext||window.webkitAudioContext)();
+  await ac.resume();const src=ac.createMediaStreamSource(stream);
+  analyser=ac.createAnalyser();analyser.fftSize=1024;src.connect(analyser);
+  chunks=[];hasSpeech=false;lastSpeech=Date.now();started=Date.now();done=false;
+  recorder=new MediaRecorder(stream);
+  recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+  recorder.onerror=()=>{report('Ошибка записи. Попробуй ещё раз.',true);endRecording()};
+  recorder.onstop=()=>{
+   if(done)return;done=true;
+   const b=new Blob(chunks,{type:recorder?.mimeType||'audio/mp4'});
+   recorder=null;clearResources();buttons(true);
+   if(blobUrl)URL.revokeObjectURL(blobUrl);blobUrl=URL.createObjectURL(b);
+   audio.src=blobUrl;audio.hidden=false;
+   if(!hasSpeech){working=false;buttons(false);report('Речь не обнаружена. Нажми язык и попробуй снова.',true);return}
+   processRecording(b,language,seq);
+  };
+  recorder.start();buttons(true);report('🎧 Слушаю '+(language==='hy'?'армянский':'китайский')+'… Говори. После паузы всё произойдёт автоматически.');
+  const samples=new Uint8Array(analyser.fftSize);
+  function detect(){
+   if(!recorder||recorder.state!=='recording')return;
+   analyser.getByteTimeDomainData(samples);let sum=0;
+   for(const v of samples){const d=(v-128)/128;sum+=d*d}
+   const rms=Math.sqrt(sum/samples.length),now=Date.now();
+   if(rms>.018){hasSpeech=true;lastSpeech=now}
+   if((hasSpeech&&now-lastSpeech>1250&&now-started>850)||now-started>12000){endRecording();return}
+   frame=requestAnimationFrame(detect);
   }
- }catch(err){setVoice('Автоматический режим недоступен: '+err.message)}
- finally{autoOn=false;mic.disabled=false;auto.textContent='🟢 Начать — армянский → китайский';stopStream();manualLabel()}
+  frame=requestAnimationFrame(detect);
+ }catch(e){clearResources();recorder=null;working=false;buttons(false);report('Микрофон не открылся: '+e.message,true)}
 }
-auto.onclick=()=>startAuto();
-$('swap').addEventListener('click',()=>{if(autoOn){auto.click()}setVoice('Язык изменён. Нажми «Начать разговор», чтобы слушать собеседника.')});
-manualLabel();
+hy.onclick=()=>start('hy');zh.onclick=()=>start('zh');stop.onclick=endRecording;
+el('translate').onclick=async()=>{const q=source.value.trim();if(!q)return report('Сначала произнеси или введи фразу.',true);if(working)return;if(q.length>450)return report('Слишком длинный текст.',true);working=true;buttons(true);try{await translateText(q,selected)}catch(e){report(e.message,true)}finally{working=false;buttons(false)}};
+el('speak').onclick=()=>speak(target.textContent,selected==='hy'?'zh':'hy');
+document.addEventListener('visibilitychange',()=>{if(document.hidden)endRecording()});
 })();
 </script></body></html>
