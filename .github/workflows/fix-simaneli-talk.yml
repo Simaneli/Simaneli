@@ -31,19 +31,19 @@ jobs:
           #text-results{position:relative;z-index:2}
           #footer .talk-contact-link{display:block;background:linear-gradient(140deg,#112b43,#061525);border:2px solid #d6a65e;border-radius:16px;color:#f2d397;padding:14px 8px;font:600 19px Georgia,serif;text-align:center;text-decoration:none}
           /* Long speech and translation use normal document flow */
-          #text-results{margin:14px auto;width:min(94%,580px);display:flex;flex-direction:column;gap:14px}
-          .talk-result-panel{background:#06192c;border:2px solid #d6a65e;box-shadow:0 0 12px #d6a65e66;border-radius:17px;padding:14px;color:#f7dca7}
-          .talk-result-title{font:600 21px Georgia,serif;margin-bottom:10px}
-          #text-results #source,#text-results #target{position:static!important;display:block!important;top:auto!important;left:auto!important;width:100%!important;height:auto!important;min-height:110px!important;max-height:none!important;background:#071b30!important;border:1px solid #c59a58!important;border-radius:12px;padding:12px!important;font:16px/1.5 -apple-system,BlinkMacSystemFont,sans-serif!important;color:#f4dda9!important;white-space:pre-wrap!important;overflow-wrap:anywhere!important;word-break:break-word!important;overflow:visible!important}
+          #text-results{margin:18px auto!important;width:calc(100% - 52px)!important;max-width:470px!important;display:flex;flex-direction:column;gap:12px!important}
+          .talk-result-panel{background:linear-gradient(160deg,#102840,#061526 85%);border:1.5px solid #d6a65e;box-shadow:0 0 0 1px #654b28,0 5px 18px #0007,inset 0 1px 0 #f9dda880;border-radius:19px;padding:15px 14px;color:#f7dca7}
+          .talk-result-title{font:600 19px Georgia,serif;margin-bottom:10px;color:#f6d69c;text-shadow:0 0 6px #b5884155}
+          #text-results #source,#text-results #target{position:static!important;display:block!important;top:auto!important;left:auto!important;width:100%!important;height:auto!important;min-height:70px!important;max-height:none!important;background:#071b30!important;border:1px solid #c59a58!important;border-radius:12px;padding:12px!important;font:16px/1.5 -apple-system,BlinkMacSystemFont,sans-serif!important;color:#f4dda9!important;white-space:pre-wrap!important;overflow-wrap:anywhere!important;word-break:break-word!important;overflow:visible!important}
           #text-results #source{resize:vertical!important}
-          #text-results #target{min-height:100px!important}
+          #text-results #target{min-height:70px!important}
           #status{position:static!important;top:auto!important;left:auto!important;width:100%!important;height:auto!important;min-height:34px;margin:10px auto!important;padding:9px!important;background:#092238!important;border:1px solid #ba904f;border-radius:14px;color:#f0d5a2!important;font-size:13px!important}
           #actions{position:static!important;top:auto!important;left:auto!important;transform:none!important;width:100%!important;display:flex!important;justify-content:center!important;gap:10px!important;margin:12px auto!important}
           #actions button{font-size:13px!important;white-space:nowrap}
           #recording{position:static!important;top:auto!important;left:auto!important;width:100%!important;margin:8px auto!important}
           #recording audio{display:block;width:100%;max-width:420px;margin:8px auto;height:36px}
           #recording audio[hidden]{display:none}
-          #footer{padding:18px 14px 110px!important;display:flex!important;flex-direction:column!important;gap:12px!important;margin-top:22px!important}#footer #actions{order:1}#footer #recording{order:2}#footer #status{order:3}#footer #wechatnote{order:4}#footer audio{position:relative!important}#footer #actions button{min-height:42px}
+          #footer{width:calc(100% - 52px)!important;max-width:470px!important;padding:18px 15px 45px!important;display:flex!important;flex-direction:column!important;gap:12px!important;margin:16px auto 36px!important;border-radius:19px!important;background:linear-gradient(145deg,#11283d,#061527)!important;box-shadow:0 3px 16px #0006!important}#footer #actions{order:1}#footer #recording{order:2}#footer #status{order:3}#footer #wechatnote{order:4}#footer audio{position:relative!important}#footer #actions button{min-height:42px}
           @media(max-width:390px){#actions button{font-size:11px!important;padding:8px!important}}
           </style>"""
           if 'id="simaneli-voice-fixes"' in s:
@@ -84,9 +84,9 @@ jobs:
             };
             wrapper.append(makePanel('Распознанная речь',src),makePanel('Перевод',target));
             main.after(wrapper);
-            const resize=()=>{src.style.height='auto';src.style.height=Math.max(110,src.scrollHeight+8)+'px'};
+            const resize=()=>{src.style.height='auto';src.style.height=Math.max(70,src.scrollHeight+8)+'px'};
             src.addEventListener('input',resize);
-            new MutationObserver(()=>{const n=target.textContent.length;if(n)target.style.minHeight='110px'}).observe(target,{childList:true,characterData:true,subtree:true});
+            new MutationObserver(()=>{const n=target.textContent.length;if(n)target.style.minHeight='70px'}).observe(target,{childList:true,characterData:true,subtree:true});
             new MutationObserver(resize).observe(src,{attributes:true,attributeFilter:['value']});
             setInterval(resize,900);
             resize();
