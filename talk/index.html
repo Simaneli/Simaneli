@@ -41,6 +41,17 @@ a.hotspot:focus-visible,button.hotspot:focus-visible {outline:2px solid #ffe4a0}
 #footer a {color:#ffe0a5} #copywechat{background:none;border:none;color:#f1cd87;cursor:pointer}
 .active {box-shadow:inset 0 0 0 3px #ffe0a3!important;border-radius:20px}
 @media(min-width:581px){#source,#target{font-size:17px}#status{font-size:13px}}
+
+/* Simaneli fixes: controls never cover the illustrated card */
+#actions{position:static!important;transform:none!important;left:auto!important;top:auto!important;width:auto!important;display:flex!important;gap:10px;flex-wrap:wrap;margin:0 auto 10px;justify-content:center}
+#actions button{min-height:42px;padding:9px 15px;font-size:15px}
+#recording{position:static!important;top:auto!important;left:auto!important;width:100%!important;font-size:13px;margin:10px auto 0}
+#recording audio{height:38px;max-width:100%}
+#footer{margin-top:15px}
+#source{top:73.1%;height:3.1%;min-height:30px;padding:5px 10px;font-size:clamp(12px,2.8vw,17px)}
+#target{top:84.1%;height:3%;min-height:30px;padding:5px 10px;font-size:clamp(12px,2.8vw,17px)}
+#status{top:60.25%;height:3%;max-height:42px;background:#071b2acb;border-radius:10px;padding:2px 5px}
+@media(max-width:380px){#source,#target{font-size:12px}}
 </style>
 </head>
 <body>
@@ -64,12 +75,27 @@ WhatsApp: <a href="https://wa.me/8617520055552" target="_blank" rel="noopener">+
 <script>
 (()=>{
 "use strict";
+/* Keep action buttons and audio replay out of the image overlay */
+const footer=document.getElementById('footer');
+footer.insertBefore(document.getElementById('actions'),footer.firstChild);
+footer.appendChild(document.getElementById('recording'));
+
 const el=id=>document.getElementById(id);
 const api="https://simaneli-talk-api.sls097323232.workers.dev/transcribe";
 const hy=el("hy"),zh=el("zh"),stop=el("stop"),source=el("source"),target=el("target"),status=el("status");
 let stream=null,recorder=null,analyser=null,ctx=null,chunks=[],frame=0,working=false,selected="hy",seq=0,spoke=false,lastSound=0,started=0;
 function report(message){status.textContent=message}
-function unlock(){try{if("speechSynthesis" in window)speechSynthesis.getVoices()}catch{}}
+let autoAudioPrimed=false;
+function unlock(){try{
+ if(!("speechSynthesis" in window))return;
+ speechSynthesis.getVoices();
+ if(autoAudioPrimed)return;
+ const silent=new SpeechSynthesisUtterance(" ");
+ silent.lang="zh-CN";silent.volume=0;
+ speechSynthesis.speak(silent);
+ if(speechSynthesis.paused)speechSynthesis.resume();
+ autoAudioPrimed=true;
+}catch{}}
 function closeStream(){if(frame)cancelAnimationFrame(frame);frame=0;if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;if(ctx)ctx.close().catch(()=>{});ctx=null}
 function stopRecording(){if(recorder&&recorder.state==="recording")recorder.stop()}
 function setBusy(b){hy.disabled=b;zh.disabled=b;stop.disabled=!recorder||recorder.state!=="recording"}
@@ -83,7 +109,8 @@ function say(text,lang){return new Promise(resolve=>{
   if(voice)u.voice=voice;
   u.onend=()=>resolve();u.onerror=()=>{report("Не удалось воспроизвести голос");resolve()};
   speechSynthesis.speak(u);
-  setTimeout(resolve,12000);
+  if(speechSynthesis.paused)speechSynthesis.resume();
+  setTimeout(()=>{if(!speechSynthesis.speaking)report("Перевод готов. Если Safari не воспроизвёл голос автоматически, нажми «🔊 Озвучить».");resolve()},12000);
 })}
 async function translate(text,lang){
   const src=lang==="hy"?"hy":"zh-CN",dest=lang==="hy"?"zh-CN":"hy";
@@ -154,7 +181,7 @@ el("translate").onclick=async()=>{
   if(working)return;working=true;setBusy(true);
   try{await translate(q,selected)}catch(e){report("Ошибка: "+e.message)}finally{working=false;setBusy(false)}
 };
-el("speak").onclick=()=>say(target.textContent,selected==="hy"?"zh":"hy");
+el("speak").onclick=()=>{unlock();return say(target.textContent,selected==="hy"?"zh":"hy")};
 el("copywechat").onclick=async()=>{try{await navigator.clipboard.writeText("+8617520055552");el("wechatnote").textContent="Номер скопирован"}catch{el("wechatnote").textContent="+86 175 2005 5552"}};
 document.addEventListener("visibilitychange",()=>{if(document.hidden)stopRecording()});
 })();
