@@ -79,11 +79,59 @@ header{background:#222;color:white;padding:24px 18px 20px;position:sticky;top:0;
 .subcategory-filters{width:100%;display:flex;gap:8px;flex-wrap:wrap;margin-top:2px;padding-top:8px;border-top:1px solid #e8e3d9}
 .category-filter.subcategory{font-size:13px;padding:8px 11px;background:#fff}
 </style>
+
+<style id="simaneli-final-design-v1">
+:root{--bg:#f8f5ef;--card:#fff;--ink:#202020;--accent:#997344;--line:#e9e3db}
+body{background:#f8f5ef!important;color:#242424;-webkit-font-smoothing:antialiased}
+header{background:#fff!important;color:#201c18!important;border-bottom:1px solid #e9e3dc!important;box-shadow:0 2px 12px rgba(24,18,13,.04)!important;padding:14px 16px!important}
+header .wrap{max-width:1180px}
+header .brand{font-family:Georgia,'Times New Roman',serif!important;font-weight:500!important;letter-spacing:2px!important;font-size:clamp(25px,4vw,35px)!important}
+header .sub{text-transform:uppercase;letter-spacing:2.1px!important;color:#8f8172!important;font-size:9px!important;opacity:1!important}
+header .brand-flags{opacity:.88}
+.hero.wrap{max-width:1180px!important;padding:20px 14px 8px!important}
+.simaneli-editorial{overflow:hidden;display:grid;grid-template-columns:1.15fr .85fr;position:relative;background:#e9e1d5;border-radius:19px;min-height:275px;margin-bottom:27px;box-shadow:0 11px 36px rgba(83,63,42,.08)}
+.simaneli-editorial-content{position:relative;z-index:2;padding:clamp(26px,5vw,52px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+.simaneli-overline{letter-spacing:3px;font-size:10px;font-weight:750;color:#947654}
+.simaneli-editorial-heading{font:normal clamp(34px,5vw,66px)/1.05 Georgia,'Times New Roman',serif;color:#29231d;margin:14px 0}
+.simaneli-editorial-sub{line-height:1.6!important;font-size:14px!important;max-width:450px;color:#6e6358!important}
+.simaneli-explore{margin-top:19px;padding:13px 20px;background:#29241e;color:#fff!important;border-radius:5px;font-size:12px;font-weight:700;text-decoration:none!important;letter-spacing:.5px;display:inline-flex;gap:25px}
+.simaneli-editorial-art{position:relative;isolation:isolate;background:radial-gradient(circle at 48% 46%,#e2d2bb 0%,#cbb59b 55%,#b49b7d 100%);overflow:hidden}
+.simaneli-art-ring{position:absolute;width:270px;height:270px;border:1px solid #ffffff90;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 35px #ffffff18,0 0 0 75px #ffffff16}
+.simaneli-art-letter{font:normal clamp(180px,24vw,300px)/1 Georgia,serif;position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);color:#f5eee6;text-shadow:9px 12px 25px #68544055}
+.simaneli-art-tag{position:absolute;bottom:20px;right:22px;letter-spacing:2px;color:#fff;font-size:9px;font-weight:700}
+.hero>h1{font-size:clamp(25px,4vw,34px)!important;letter-spacing:-.5px!important;color:#24201e}
+.hero>.search{border:1px solid #e5dfd6!important;box-shadow:0 2px 14px #251b1308!important;border-radius:13px!important;background:#fff!important}
+.grid.wrap{max-width:1180px!important}
+.card{border-radius:14px!important;box-shadow:0 5px 21px rgba(44,35,23,.065)!important;border:1px solid #ede7dd!important;transition:transform .15s ease,box-shadow .15s ease}
+.card:active{transform:scale(.99)}
+.card img{object-fit:contain!important;background:#f4f0eb!important;padding:5px}
+.card-body{background:#fff}
+.card .name{font-weight:650!important}
+.card .price{color:#29221b}
+.btn:not(.alt){background:#302a24!important;color:#fff!important}
+.bottom{background:#ffffffed!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 -3px 20px #00000008!important;padding-bottom:max(10px,env(safe-area-inset-bottom))!important}
+.sheet{background:#faf8f5!important}
+.detail-img{object-fit:contain!important;background:#f5f1eb!important}
+#productModal .sheet-head{background:#fff!important}
+@media(min-width:700px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}.card img{height:265px!important}}
+@media(max-width:650px){header{padding:12px 13px!important}.simaneli-editorial{grid-template-columns:1fr .47fr;min-height:235px;margin-bottom:23px}.simaneli-editorial-content{padding:24px 15px}.simaneli-overline{font-size:8px;letter-spacing:1.4px}.simaneli-editorial-heading{font-size:clamp(30px,8vw,45px)}.simaneli-editorial-sub{font-size:11px!important;line-height:1.5!important}.simaneli-explore{margin-top:12px;padding:11px 12px;font-size:10px;gap:10px}.simaneli-art-ring{width:130px;height:130px}.simaneli-art-letter{font-size:150px}.simaneli-art-tag{font-size:7px;letter-spacing:.5px;right:7px}.grid .card img{height:210px!important}}
+@media(max-width:360px){.simaneli-editorial{grid-template-columns:1fr .3fr}.simaneli-editorial-heading{font-size:29px}.simaneli-art-letter{font-size:115px}}
+@media(prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
 </head>
 <body>
 <header><div class="wrap"><div class="brand-line"><div class="brand">Simaneli</div><div class="brand-flags" aria-label="Китай, Армения, Грузия, Иран, ОАЭ, Россия, США, Южная Корея, Турция, Италия"><span title="Китай">🇨🇳</span><span title="Армения">🇦🇲</span><span title="Грузия">🇬🇪</span><span title="Иран">🇮🇷</span><span title="ОАЭ">🇦🇪</span><span title="Россия">🇷🇺</span><span title="США">🇺🇸</span><span title="Южная Корея">🇰🇷</span><span title="Турция">🇹🇷</span><span title="Италия">🇮🇹</span></div></div><div class="sub">Global wholesale marketplace</div></div></header>
 
 <div class="hero wrap">
+  <section class="simaneli-editorial" aria-label="Simaneli — главная коллекция">
+    <div class="simaneli-editorial-content">
+      <div class="simaneli-overline">SIMANELI · GLOBAL MARKETPLACE</div>
+      <div class="simaneli-editorial-heading">Стиль вне границ.</div>
+      <p class="simaneli-editorial-sub">Одежда, обувь, аксессуары и товары для бизнеса — в одном каталоге.</p>
+      <a class="simaneli-explore" href="#grid">Смотреть коллекцию <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="simaneli-editorial-art" aria-hidden="true"><div class="simaneli-art-ring"></div><div class="simaneli-art-letter">S</div><div class="simaneli-art-tag">NEW SEASON · SELECTION</div></div>
+  </section>
   <h1>Каталог</h1>
   <p>Выберите товар, размер и цвет. Заказ можно оформить прямо на сайте.</p>
   <p class="wholesale-contact">Опт: WhatsApp Китай <a href="https://wa.me/8617520055552" target="_blank" rel="noopener noreferrer">+86 175 2005 5552</a></p>
