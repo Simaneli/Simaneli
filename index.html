@@ -243,6 +243,32 @@ const allProductCategories = [...new Set([...Object.values(categoryGroups).flat(
 
 const money = n => Number(n).toLocaleString('ru-RU') + ' ֏';
 const finalPrice = p => p.discount>0 ? Math.round(p.price*(1-p.discount/100)) : p.price;
+// Normalize image fields: database may store an URL, a JSON array of URLs, or an actual array.
+function productImageUrl(value, sku){
+  let candidate=value;
+  if(typeof candidate==='string'){
+    const trimmed=candidate.trim();
+    if(trimmed.startsWith('[') || trimmed.startsWith('{')){
+      try{candidate=JSON.parse(trimmed)}catch(e){candidate=trimmed}
+    }
+  }
+  if(Array.isArray(candidate))candidate=candidate.find(v=>typeof v==='string' && v.trim())||'';
+  if(candidate && typeof candidate==='object')candidate=candidate.url||candidate.src||candidate[0]||'';
+  if(typeof candidate==='string')candidate=candidate.trim();
+  if(typeof candidate==='string' && /^(https?:\/\/|data:image\/|\/)/i.test(candidate))return candidate;
+  return fallbackImages[sku] || PLACEHOLDER_IMG;
+}
+function productImageFallback(image, sku){
+  if(image.dataset.fallbackApplied)return;
+  image.dataset.fallbackApplied='1';
+  const replacement=fallbackImages[sku] || PLACEHOLDER_IMG;
+  if(image.src!==replacement)image.src=replacement;
+}
+function discountHtml(p, detail=false){
+  const discounted=finalPrice(p);
+  if(!(p.discount>0) || !(p.price>discounted))return `<div class="price">${money(discounted)}</div>`;
+  return `<div class="old-price">${money(p.price)}</div><div class="discount-label">−${p.discount}%</div><div class="price">${money(discounted)}</div>`;
+}
 function syncCartPrices(){
   let changed=false;
   cart.forEach(item=>{
@@ -271,7 +297,7 @@ async function loadProductsFromSupabase(){
       sizes:Array.isArray(p.sizes)?p.sizes:[],
       colors:Array.isArray(p.colors)?p.colors:[],
       moq:String(p.moq ?? 1),
-      img:p.image_url || fallbackImages[p.sku] || PLACEHOLDER_IMG,
+      img:productImageUrl(p.image_url,p.sku),
       category:p.category||'',
       currency:p.currency||'AMD'
     }));
@@ -320,42 +346,30 @@ function renderProducts(){
     return categoryMatch && (p.name+' '+p.sku).toLowerCase().includes(q);
   });
   document.getElementById('grid').innerHTML=list.map(p=>`
-  <div class="card" onclick="openProduct('${p.sku}')">
-    <img src="${p.img}" alt="${p.name}">
+  <div class="card" onclick="openProductByIndex(${products.indexOf(p)})" role="button" tabindex="0" onkeydown="if(event.key==='Enter')openProductByIndex(${products.indexOf(p)})">
+    <img src="${escapeHtml(productImageUrl(p.img,p.sku))}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="productImageFallback(this, ${JSON.stringify(p.sku).replace(/"/g,'&quot;')})">
     <div class="card-body">
-      <div class="sku">${p.sku}</div>
-      <div class="name">${p.name}</div>
+      <div class="sku">${escapeHtml(p.sku)}</div>
+      <div class="name">${escapeHtml(p.name)}</div>
       ${p.description?.trim()?`<div class="card-description">${escapeHtml(p.description.trim())}</div>`:''}
-      <div class="meta">Размеры: ${p.sizes.join(' / ')}<br>MOQ: ${p.moq}</div>
-      
-${p.discount>0
-? `<div style="font-size:14px;color:#888;text-decoration:line-through">${money(p.price)}</div>
-   <div style="font-size:14px;font-weight:700;color:#b42318">-${p.discount}%</div>
-   <div class="price">${money(Math.round(p.price*(1-p.discount/100)))}</div>`
-: `<div class="price">${money(p.price)}</div>`
-}
+      <div class="meta">Размеры: ${escapeHtml(p.sizes.join(' / '))}<br>MOQ: ${escapeHtml(p.moq)}</div>
+      <div class="card-pricing">${discountHtml(p)}</div>
     </div>
   </div>`).join('');
   updateCount();
 }
 
+function openProductByIndex(index){ const item=products[index]; if(item)openProduct(item.sku); }
 function openProduct(sku){
   current=products.find(p=>p.sku===sku);
+  if(!current)return;
   selectedSize=current.sizes[0]||null;
   selectedColor=current.colors[0]||null;
-  detailImg.src=(()=>{
-  try{
-    const a=JSON.parse(current.img);
-    return Array.isArray(a) ? a[0] : current.img;
-  }catch(e){
-    return current.img;
-  }
-})(); detailSku.textContent=current.sku; detailName.textContent=current.name;
-  detailPrice.innerHTML=current.discount>0
-? `<span style="font-size:16px;color:#888;text-decoration:line-through">${money(current.price)}</span>
-   <span style="display:block;font-size:16px;font-weight:700;color:#b42318">-${current.discount}%</span>
-   <span style="display:block;font-size:24px;font-weight:800">${money(Math.round(current.price*(1-current.discount/100)))}</span>`
-: money(current.price); detailMoq.textContent='MOQ: '+current.moq;
+  detailImg.dataset.fallbackApplied='';
+  detailImg.onerror=()=>productImageFallback(detailImg,current.sku);
+  detailImg.src=productImageUrl(current.img,current.sku);
+  detailSku.textContent=current.sku; detailName.textContent=current.name;
+  detailPrice.innerHTML=discountHtml(current,true); detailMoq.textContent='MOQ: '+current.moq;
   detailDescription.textContent=current.description?.trim()||'';
   detailDescription.hidden=!detailDescription.textContent;
   renderVariantChips();
@@ -1274,6 +1288,25 @@ header .brand-flags span{display:inline-block}
   #categoryFilters .category-main-row{gap:8px!important}
   #categoryFilters .category-main-row > button.category-filter{font-size:12px!important;height:56px!important;min-height:56px!important;max-height:56px!important}
 }
+</style>
+
+<style id="simaneli-final-mobile-repairs">
+/* Compact cards without empty vertical gaps; photos keep their full framing. */
+#grid.grid{align-items:start!important;grid-auto-rows:auto!important}
+#grid .card{height:auto!important;min-height:0!important;display:flex!important;flex-direction:column!important;align-self:start!important}
+#grid .card img{width:100%!important;object-fit:contain!important;background:#f6f3ef!important;display:block!important}
+#grid .card-body{height:auto!important;min-height:0!important;display:flex!important;flex-direction:column!important;gap:5px!important}
+#grid .card-body .name,#grid .card-body .meta,#grid .card-description,#grid .card-pricing{margin:0!important}
+#grid .card-description{display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;line-clamp:2!important;overflow:hidden!important;line-height:1.35!important;color:#746d65!important;font-size:12px!important}
+#grid .card-pricing{margin-top:5px!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:4px!important}
+#grid .card-pricing .price{margin:0!important;line-height:1.2!important}
+.old-price{font-size:12px!important;color:#8b8580!important;text-decoration:line-through!important}
+.discount-label{font-size:13px!important;font-weight:700!important;color:#b42318!important}
+body > .contact-buttons.contact-actions{left:9px!important;right:9px!important;bottom:max(5px,env(safe-area-inset-bottom))!important;gap:6px!important}
+body > .contact-buttons.contact-actions > a.contact-action{height:42px!important;min-height:42px!important;padding:5px 3px!important;font-size:clamp(10px,2.9vw,12px)!important;border-radius:11px!important;gap:4px!important}
+body > .contact-buttons.contact-actions > a.contact-action > svg{height:16px!important;width:16px!important;flex-basis:16px!important}
+@media(max-width:650px){#grid .card img{height:190px!important}#grid .card-body{padding:10px!important}#grid .card-pricing .price{font-size:17px!important}}
+@media(max-width:370px){#grid .card img{height:165px!important}body > .contact-buttons.contact-actions > a.contact-action > svg{width:14px!important;height:14px!important}}
 </style>
 </body></html>
  
